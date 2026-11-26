@@ -38,3 +38,10 @@ test('ignores CMS default colours and falls back to menu labels when no products
   assert.deepEqual(p.products.map(x => x.name).slice(0, 2), ['IOT Modules', 'SIP']);
   assert.ok(p.notes.some(n => /menu/.test(n)));
 });
+
+test('news-ticker links are not treated as products', async () => {
+  const page = `<html><head><title>X Corp</title></head><body><main><div class="product-item"><a href="/n1"><img src="/a.jpg"><h3>Latest News</h3></a></div><div class="product-item"><a href="/p1"><img src="/b.jpg"><h3>Smart Relay SR-1</h3></a></div></main></body></html>`;
+  const p = await extractProfile('x.example', { fetcher: async u => ({ text: page, url: u.startsWith('http') ? u : 'https://x.example/' }) });
+  assert.ok(!p.products.some(x => /news/i.test(x.name)));
+  assert.ok(p.products.some(x => /Smart Relay/.test(x.name)));
+});
