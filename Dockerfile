@@ -6,4 +6,4 @@ COPY . .
 ENV NODE_ENV=production PORT=3000
 EXPOSE 3000
 HEALTHCHECK CMD wget -qO- http://localhost:3000/healthz || exit 1
-CMD ["node", "server.js"]
+CMD ["node", "local-server.js"]

@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Paste any company website and get 5 modern, interactive redesign concepts instantly.",
   "type": "module",
-  "main": "server.js",
+  "main": "local-server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js",
+    "start": "node local-server.js",
+    "dev": "node --watch local-server.js",
     "test": "node --test test/*.test.js",
     "leads": "node scripts/build-leads.js"
   },

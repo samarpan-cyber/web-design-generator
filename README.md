@@ -69,7 +69,7 @@ Built-in protections: SSRF guard (private/loopback/metadata IPs blocked, re-chec
 public/            frontend (chat UI, preview grid, present mode)
   engine/          the 5 templates + shared helpers + in-page runtime
 lib/               extractor (cheerio), safe fetcher, colour utils, API handler
-api/               Vercel functions        server.js  plain Node server
+api/               Vercel functions        local-server.js  plain Node server (non-Vercel hosts)
 scripts/           build-leads · shoot (screenshots) · e2e (browser smoke test)
 test/              unit tests + HTML fixture
 ```
