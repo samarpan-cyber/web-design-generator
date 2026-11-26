@@ -74,7 +74,7 @@ export function renderBento(profile, opts = {}) {
 ${trust.length ? `<div class="trust wrap">${trust.map(t => `<span>${esc(t)}</span>`).join('<span>·</span>')}</div>` : ''}
 <section id="about"><div class="wrap"><div class="sec-title" data-reveal><small>Why ${esc(m.name)}</small><h2>Everything you need, at a glance</h2></div>
 <div class="bento">
-<div class="tile a" data-tilt="3" data-spot data-reveal="zoom">${media(P[0])}<div class="cap"><h3>${esc(P[0].name)}</h3><p>${esc(P[0].desc || 'Our flagship — built for performance and long service life.')}</p><button class="btn brand" style="margin-top:14px" data-quote="${esc(P[0].name)}"><span data-label>Add to quote</span></button></div></div>
+<div class="tile a" data-tilt="3" data-spot data-reveal="zoom">${media(P[0])}<div class="cap"><h3>${esc(P[0].name)}</h3><p>${esc(P[0].desc || 'Featured from the catalogue — request pricing and datasheets.')}</p><button class="btn brand" style="margin-top:14px" data-quote="${esc(P[0].name)}"><span data-label>Add to quote</span></button></div></div>
 <div class="tile b" data-tilt="6" data-reveal data-delay="80">${s0 ? `<div class="big" data-count="${s0.value}" data-suffix="${esc(s0.suffix || '')}">0</div><p>${esc(s0.label)}</p>` : `<div class="big">${P.length}+</div><p>Products</p>`}<div class="dots"></div></div>
 <div class="tile c" data-tilt="6" data-spot data-reveal data-delay="140"><h3>Dark &amp; light, instantly</h3><p>Switch the theme any time from the top bar. Your catalogue reads beautifully either way.</p></div>
 <div class="tile d" data-spot data-reveal><h3>Product range</h3><p>Find the right part fast.</p><div class="pills">${pills.map(x => `<span>${esc(x)}</span>`).join('')}</div></div>

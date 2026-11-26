@@ -45,3 +45,10 @@ test('news-ticker links are not treated as products', async () => {
   assert.ok(!p.products.some(x => /news/i.test(x.name)));
   assert.ok(p.products.some(x => /Smart Relay/.test(x.name)));
 });
+
+test('contact blocks are not used as the company description', async () => {
+  const page = `<html><head><title>Y Ltd</title></head><body><main><p># 675, Sri Krishna Prowess, 14th Cross, JP Nagar, Bengaluru. Phone: 2659 2222, Fax: 91-80-2659 2220, Email: a@y.com</p><p>Y Ltd manufactures precision capacitors and crystals for industrial and automotive customers across India.</p></main></body></html>`;
+  const p = await extractProfile('y.example', { fetcher: async u => ({ text: page, url: u.startsWith('http') ? u : 'https://y.example/' }) });
+  assert.match(p.about, /manufactures precision capacitors/);
+  assert.ok(!/Phone/.test(p.description));
+});
