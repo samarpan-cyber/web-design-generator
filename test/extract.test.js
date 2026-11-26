@@ -29,3 +29,12 @@ test('ssrf guard', () => {
   for (const ip of ['127.0.0.1', '10.1.2.3', '192.168.0.9', '169.254.169.254', '::1', 'fd00::1']) assert.ok(isPrivateIp(ip), ip);
   assert.ok(!isPrivateIp('8.8.8.8'));
 });
+
+test('ignores CMS default colours and falls back to menu labels when no products found', async () => {
+  const page = `<html><head><title>Acme Wireless</title><style id="global-styles-inline-css">:root{--wp--preset--color--primary:#007cba}</style><style>.cta{background:#d4145a}.cta2{color:#d4145a}</style></head>
+  <body><header><nav><ul><li><a href="/">Home</a></li><li><a href="/iot-modules">IOT Modules</a></li><li><a href="/sip">SIP</a></li><li><a href="/about">About</a></li><li><a href="/contact">Contact</a></li></ul></nav></header><main><h1>Wireless made simple</h1><p>Short.</p></main></body></html>`;
+  const p = await extractProfile('acme.example', { fetcher: async u => ({ text: page, url: u.startsWith('http') ? u : 'https://acme.example/' }) });
+  assert.equal(p.colors.primary, '#d4145a');
+  assert.deepEqual(p.products.map(x => x.name).slice(0, 2), ['IOT Modules', 'SIP']);
+  assert.ok(p.notes.some(n => /menu/.test(n)));
+});
