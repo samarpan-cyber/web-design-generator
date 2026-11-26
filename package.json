@@ -1,0 +1,17 @@
+{
+  "name": "web-design-generator",
+  "version": "1.0.0",
+  "description": "Paste any company website and get 5 modern, interactive redesign concepts instantly.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test test/*.test.js",
+    "leads": "node scripts/build-leads.js"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": { "cheerio": "1.0.0" },
+  "license": "UNLICENSED",
+  "private": true
+}
