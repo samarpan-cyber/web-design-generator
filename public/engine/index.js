@@ -23,10 +23,10 @@ function hash(str) { let h = 2166136261; for (const ch of String(str)) h = Math.
 function shuffle(a, r) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
 /** Pick five: 3 modern + 2 classic by default. `round` gives a different set for the same site (shuffle). */
-export function pickSet(profile = {}, round = 0, { modern: nm = 3, classic: nc = 2 } = {}) {
+export function pickSet(profile = {}, round = 0, { modern: nm = 3, classic: nc = 2, allow = null } = {}) {
   const r = rng(hash((profile.host || profile.name || 'site') + ':' + round));
-  const m = shuffle(LIBRARY.filter(t => t.family === 'modern'), r).slice(0, nm);
-  const c = shuffle(LIBRARY.filter(t => t.family === 'classic'), r).slice(0, nc);
+  const m = shuffle(LIBRARY.filter(t => t.family === 'modern' && (!allow || allow.includes(t.id))), r).slice(0, nm);
+  const c = shuffle(LIBRARY.filter(t => t.family === 'classic' && (!allow || allow.includes(t.id))), r).slice(0, nc);
   return [...c.slice(0, 1), ...m, ...c.slice(1)];
 }
 

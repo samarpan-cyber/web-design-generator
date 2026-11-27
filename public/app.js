@@ -1,4 +1,4 @@
-import { TEMPLATES } from './engine/index.js';
+import { TEMPLATES, pickSet, setSet } from './engine/index.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
@@ -144,8 +144,9 @@ async function generate(input) {
   if (!res.ok) {
     $('#results').hidden = true; $('#welcome').hidden = false;
     bot.className = 'msg bot err';
-    bot.innerHTML = `That site would not open: <b>${esc(res.error || 'unknown error')}</b>.<br><span style="color:var(--muted)">Some sites block automated visitors. You can still build five designs from the name alone, then fill in details with Edit details.</span><div class="acts"><button class="ghost" id="nameOnly">Build from name only</button></div>`;
-    $('#nameOnly', bot).onclick = () => fromNameOnly(target); return;
+    bot.innerHTML = `That site would not open: <b>${esc(res.error || 'unknown error')}</b>.<br><span style="color:var(--muted)">Some sites block automated visitors. You can still build five designs from the name alone, then fill in details with Edit details.</span><div class="acts"><button class="primary" id="addData">Add a sheet, sitemap or screenshot</button><button class="ghost" id="nameOnly">Build from name only</button></div>`;
+    $('#nameOnly', bot).onclick = () => fromNameOnly(target);
+    if ($('#addData', bot)) $('#addData', bot).onclick = () => openIntake({ name: target.name, url: target.url }); return;
   }
   lis.forEach(l => l.classList.add('done')); summarize(res.profile, bot); showResults(res.profile);
 }
@@ -168,12 +169,14 @@ function summarize(p, el) {
 /* ---------------- results grid ---------------- */
 let io, ro;
 const themeOpt = () => (state.mode === 'auto' ? undefined : state.mode);
-const htmlFor = (t, o = {}) => t.render(state.profile, { theme: themeOpt(), agency: state.agency, ...o });
+const htmlFor = (t, o = {}) => t.render(state.profile, { theme: themeOpt(), agency: state.agency, designer: state.designer, ...o });
 const effectiveTheme = t => (state.mode === 'auto' ? t.defaultTheme : state.mode);
 function post(frame, msg) { try { frame.contentWindow.postMessage(msg, '*'); } catch { /* ignore */ } }
 
-function showResults(profile) {
-  state.profile = profile; state.favs = new Set(); state.shareUrl = null;
+function showResults(profile, keepRound) {
+  if (!keepRound) state.round = 0;
+  setSet(pickSet(profile, state.round || 0));
+  state.profile = profile; state.favs = new Set(); state.shareUrl = null; $('#shuffleBtn').disabled = false; $('#intakeBtn').disabled = false;
   $('#welcome').hidden = true; $('#results').hidden = false; $('#editBtn').disabled = false; $('#pitchBtn').disabled = false; $('#dlAll').disabled = false; $('#resume').hidden = true; setStep(3);
   document.title = `${profile.name} | Design Generator`;
   $('#resTitle').textContent = profile.name; $('#resMeta').textContent = `${profile.host}. Five concepts, five pages each. Star your favourites, then copy the pitch note.`;
@@ -257,6 +260,26 @@ $('#editForm').addEventListener('submit', e => {
   state.agency = f.agency.value.trim(); store.set('wdg-agency', state.agency); showResults(p); toast('All five designs updated');
 });
 
+/* ---------------- shuffle and intake ---------------- */
+$('#shuffleBtn').onclick = () => { state.round = (state.round || 0) + 1; showResults(state.profile, true); toast('New set of five designs'); };
+const readFile = f => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok({ name: f.name, type: f.type, data: String(r.result).split(',')[1] || '' }); r.onerror = no; r.readAsDataURL(f); });
+function openIntake(prefill = {}) {
+  const f = $('#intakeForm'); f.name.value = prefill.name || (state.profile && state.profile.name) || ''; f.url.value = prefill.url || (state.profile && state.profile.url) || ''; f.gmb.value = ''; f.files.value = ''; $('#intakeErr').textContent = ''; $('#intakeDlg').showModal();
+}
+$('#intakeBtn').onclick = () => openIntake();
+$('#intakeForm').addEventListener('submit', async e => {
+  if (e.submitter && e.submitter.value !== 'ok') return;
+  e.preventDefault(); const f = e.target, err = $('#intakeErr'); err.textContent = ''; const go = $('#intakeGo'); go.disabled = true; go.textContent = 'Reading...';
+  try {
+    const list = [...f.files.files]; if (list.some(x => x.size > 4e6)) throw new Error('Each file must be under 4 MB.');
+    const files = await Promise.all(list.map(readFile));
+    const res = await api('/api/intake', { name: f.name.value, url: f.url.value, gmb: f.gmb.value, files });
+    if (res.status === 401) { $('#intakeDlg').close(); expired(); return; }
+    if (!res.ok) throw new Error(res.error || 'Could not read that');
+    $('#intakeDlg').close(); showResults(res.profile); say(`Built from your files: ${(res.notes || []).map(esc).join(', ') || 'details added'}.${res.visionError ? ' ' + esc(res.visionError) : ''}`);
+  } catch (x) { err.textContent = x.message; } finally { go.disabled = false; go.textContent = 'Build designs'; }
+});
+
 /* ---------------- events ---------------- */
 $('#form').addEventListener('submit', e => { e.preventDefault(); const v = $('#input').value; $('#input').value = ''; if (v.trim()) generate(v); });
 document.addEventListener('click', e => {
@@ -294,7 +317,7 @@ async function openShare() {
   const dlg = $('#shareDlg'); $('#shareState').textContent = 'Creating a private link'; $('#shareBox').hidden = true; $('#shareErr').textContent = ''; dlg.showModal();
   try {
     if (!state.shareUrl || state.shareExp < Date.now() + 60_000) {
-      const r = await fetch('/api/share', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ profile: state.profile, agency: state.agency }) });
+      const r = await fetch('/api/share', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ profile: state.profile, agency: state.agency, ids: TEMPLATES.map(t => t.id) }) });
       if (r.status === 401) { dlg.close(); expired(); return; }
       const j = await r.json().catch(() => ({})); if (!r.ok || !j.ok) throw new Error(j.error || 'Could not create the link');
       state.shareUrl = `${location.origin}/s/${j.token}`; state.shareExp = j.expiresAt;
@@ -310,6 +333,7 @@ $('#shareNew').onclick = () => { state.shareUrl = null; openShare(); };
 /* ---------------- start: who is this? ---------------- */
 async function init() {
   const me = await fetch('/api/me').then(r => r.json()).catch(() => ({}));
+  state.designer = me.designer || null; state.vision = !!me.vision;
   if (me.authed) { enterApp(me.user); return; }
   showLogin(me.configured === false ? 'Login is not set up on this server yet. Add the WDG_AUTH setting in the hosting dashboard, then reload.' : '');
 }

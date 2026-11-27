@@ -1,5 +1,5 @@
 // Client-facing page for a private share link. No login: the link itself is the key, and it expires after 48 hours.
-import { TEMPLATES } from '/engine/index.js';
+import { TEMPLATES, getTemplate, setSet } from '/engine/index.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
@@ -18,7 +18,9 @@ async function load() {
   if (r.status === 410) return stateScreen('This link has expired', 'Private links stay open for 48 hours. Ask the person who sent it for a fresh one.');
   if (r.status === 503) return stateScreen('Previews are not available right now', 'Please try again a little later.');
   if (!r.ok || !j.ok) return stateScreen('This link is not valid', 'Check that the whole link was copied, or ask for a new one.');
-  state.profile = j.profile; state.agency = j.agency || ''; state.exp = j.exp;
+  state.profile = j.profile; state.agency = j.agency || ''; state.exp = j.exp; state.designer = j.designer || null;
+  const chosen = (j.ids || []).map(getTemplate).filter(Boolean); if (chosen.length) setSet(chosen);
+  renderBy(j.designer);
   document.title = `Concepts for ${j.profile.name}`;
   $('#shAgency').textContent = state.agency ? `Prepared by ${state.agency}` : 'Design concepts';
   $('#shTitle').textContent = `Five website concepts for ${j.profile.name}`;
@@ -28,7 +30,12 @@ async function load() {
   render(); route();
 }
 
-const htmlFor = (t, o = {}) => t.render(state.profile, { agency: state.agency, ...o });
+const htmlFor = (t, o = {}) => t.render(state.profile, { agency: state.agency, designer: state.designer, ...o });
+
+function renderBy(d) {
+  const box = $('#shBy'); if (!box || !d) return; const wa = String(d.whatsapp || d.phone || '').replace(/\D/g, '');
+  box.innerHTML = `<div><b>Designed by ${esc(d.company)}</b>${d.name ? `<span>${esc(d.name)}${d.role ? ', ' + esc(d.role) : ''}</span>` : ''}</div><div class="by-act">${d.phone ? `<a href="tel:${esc(d.phone.replace(/[^+\d]/g, ''))}">Call ${esc(d.phone)}</a>` : ''}${wa ? `<a class="wa" href="https://wa.me/${esc(wa)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}${d.email ? `<a href="mailto:${esc(d.email)}">${esc(d.email)}</a>` : ''}</div>`; box.hidden = false;
+}
 
 function render() {
   const grid = $('#grid'); grid.innerHTML = '';

@@ -42,3 +42,16 @@ test('decodeUpload sniffs the file type and caps size', () => {
   assert.equal(decodeUpload({ name: 's.xml', data: Buffer.from('<urlset></urlset>').toString('base64') }).kind, 'sitemap');
   assert.throws(() => decodeUpload({ name: 'x.csv', data: Buffer.alloc(9e6).toString('base64') }));
 });
+
+import { createShare, readShare } from '../lib/share.js';
+import { designerFromEnv } from '../lib/designer.js';
+test('share links remember which five designs were chosen, and only safe ids', async () => {
+  const secret = 'x'.repeat(40);
+  const r = await createShare({ name: 'Acme', host: 'acme.test', products: [] }, { agency: 'Digifyo', ids: ['noir', 'classic-corporate', '<script>', 5], by: 'tester', secret, env: {} });
+  const back = await readShare(r.token, { secret, env: {} });
+  assert.ok(back.ok); assert.deepEqual(back.data.ids, ['noir', 'classic-corporate']);
+});
+test('designer details come from settings and are never invented', () => {
+  const d = designerFromEnv({ DESIGNER_PHONE: '+91 1', DESIGNER_SITE: 'javascript:alert(1)' });
+  assert.equal(d.company, 'Digifyo'); assert.equal(d.phone, '+91 1'); assert.equal(d.email, ''); assert.equal(d.site, 'https://digifyo.com');
+});

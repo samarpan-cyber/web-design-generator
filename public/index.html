@@ -20,6 +20,8 @@
   <div class="top-actions" id="topActions" hidden>
     <a class="ghost" href="#/" id="changeInd">Change industry</a>
     <div class="seg" id="themeSeg" role="group" aria-label="Preview theme"><button data-t="auto" class="on">Auto</button><button data-t="dark">Dark</button><button data-t="light">Light</button></div>
+    <button class="ghost" id="shuffleBtn" disabled title="Build a different set of five from the design library">Shuffle set</button>
+    <button class="ghost" id="intakeBtn" disabled title="Add a product sheet, sitemap, Google Business text or a screenshot">Add data</button>
     <button class="ghost" id="editBtn" disabled>Edit details</button>
   </div>
 </header>
@@ -97,6 +99,15 @@
   <label>Logo URL<input name="logo" placeholder="https://"></label>
   <div class="two"><label>Email<input name="email"></label><label>Phone<input name="phone"></label></div>
   <div class="dlg-actions"><button value="cancel" class="ghost">Cancel</button><button value="ok" class="primary">Apply</button></div>
+</form></dialog>
+<dialog id="intakeDlg"><form method="dialog" class="edit" id="intakeForm">
+  <h3>Add information</h3><p class="hint">For sites that cannot be read. Upload an Excel or CSV product list, a sitemap.xml, a Google Business export, or a screenshot of the site. Everything is combined with what was already found.</p>
+  <label>Company name<input name="name"></label>
+  <label>Website address (optional)<input name="url" placeholder="company.com"></label>
+  <label>Files<input name="files" type="file" multiple accept=".xlsx,.csv,.tsv,.txt,.xml,.json,.png,.jpg,.jpeg,.webp"></label>
+  <label>Google Business details or notes<textarea name="gmb" rows="4" placeholder="Name: ...&#10;Phone: ...&#10;Address: ...&#10;About: ..."></textarea></label>
+  <p id="intakeErr" class="login-msg" role="alert"></p>
+  <div class="dlg-actions"><button value="cancel" class="ghost">Cancel</button><button value="ok" class="primary" id="intakeGo">Build designs</button></div>
 </form></dialog>
 <dialog id="shareDlg"><form method="dialog" class="edit">
   <h3>Share with your client</h3>
