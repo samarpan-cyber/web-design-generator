@@ -7,12 +7,12 @@ const dental = { ...base, industry: 'dentists', images: [] };
 const imgs = html => [...html.matchAll(/(?:src="|url\(')([^"')]+\.(?:jpg|jpeg|png|webp)[^"')]*)/g)].map(m => m[1]);
 
 test('every stock file exists, is a modest size and has a small twin', () => {
-  const counts = { dentists: 10, doctors: 8, electronics: 9 };
+  const counts = { dentists: 10, doctors: 8, electronics: 15, recycling: 8, process: 7, chemicals: 6 };
   for (const [ind, n] of Object.entries(counts)) for (let k = 1; k <= n; k++) for (const t of ['l', 's']) {
     const f = new URL(`../public/stock/${ind}-${k}-${t}.jpg`, import.meta.url); const sz = fs.statSync(f).size;
     assert.ok(sz > 15_000 && sz < (t === 'l' ? 400_000 : 150_000), `${ind}-${k}-${t} ${sz}`);
   }
-  assert.deepEqual(stockIndustries.slice().sort(), [...Object.keys(counts), 'realestate'].sort());
+  assert.deepEqual(stockIndustries.slice().sort(), [...Object.keys(counts).filter(k => k !== 'process'), 'realestate'].sort());
 });
 test('stock order is stable per site and different between sites', () => {
   const a = stockPhotos('dentists', 'a.test').map(x => x.src), b = stockPhotos('dentists', 'a.test').map(x => x.src), c = stockPhotos('dentists', 'zzz.test').map(x => x.src);

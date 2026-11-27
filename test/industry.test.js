@@ -12,7 +12,7 @@ test('industry is detected from any single signal', () => {
   assert.equal(detectIndustry({ name: 'Dr. Mehta Skin Clinic', category: 'Dermatologist' }).specialty, 'skin');
   assert.equal(detectIndustry({ industry: 'Electronics manufacturing', text: 'inverter ups battery' }).industry, 'electronics');
   assert.equal(detectIndustry({ ldTypes: ['Dentist'] }).industry, 'dentists');
-  assert.equal(detectIndustry({ name: 'Elite AquaChem', industry: 'Chemicals' }).industry, '', 'unknown stays unknown');
+  assert.equal(detectIndustry({ name: 'Elite AquaChem', text: 'pickling and passivation chemicals for steel, speciality chemicals manufacturer' }).industry, 'chemicals'); assert.equal(detectIndustry({ name: 'Acme', industry: 'Law' }).industry, '', 'unknown stays unknown');
 });
 test('a dental clinic is not read as a generic doctor, and a hint always wins', () => {
   assert.equal(detectIndustry({ name: 'City Dental Clinic', text: 'dentist doctors clinic patients' }).industry, 'dentists');

@@ -2,6 +2,8 @@
 // the lead's industry field, company name, free notes. Pure functions, no network.
 export const INDUSTRIES = [
   { id: 'electronics', name: 'Electronics', blurb: 'Manufacturers, components, power and IoT', ready: true },
+  { id: 'recycling', name: 'Plastic recycling', blurb: 'Recyclers, regranulators and recycling machinery makers', ready: true },
+  { id: 'chemicals', name: 'Chemicals', blurb: 'Industrial, specialty and water treatment chemical makers', ready: true },
   { id: 'dentists', name: 'Dentists', blurb: 'Dental clinics and dental specialists', ready: true },
   { id: 'doctors', name: 'Doctors', blurb: 'Clinics, hospitals and medical specialists', ready: true },
   { id: 'realestate', name: 'Real estate', blurb: 'Developers, builders, brokers and agencies', ready: true }
@@ -12,8 +14,10 @@ export const industryName = id => (INDUSTRIES.find(i => i.id === id) || {}).name
 const RULES = {
   dentists: [[/\bdentist(s|ry)?\b/i, 6], [/\bdental\b/i, 6], [/\b(bds|mds)\b/i, 5], [/\borthodont/i, 5], [/\bendodont|root canal\b/i, 4], [/\b(periodont|implantolog)/i, 4], [/\bteeth|tooth|smile|braces|aligners?|invisalign|whitening\b/i, 3], [/\boral (health|care|surgeon)|maxillofacial\b/i, 4], [/\bdds\b|\bdmd\b/i, 5]],
   doctors: [[/\b(doctor|physician|clinic|hospital|surgeon|medical|healthcare|polyclinic|nursing home)\b/i, 4], [/\b(dr\.?|md|mbbs|ms|dnb|dm|mch|frcs|mrcp)\b/i, 3], [/\b(cardiolog|dermatolog|pediatric|paediatric|gynaecolog|gynecolog|orthopaedic|orthopedic|neurolog|urolog|oncolog|ophthalmolog|ent specialist|endocrinolog|gastroenterolog|pulmonolog|psychiatr|physiotherap|ayurved|homeopath|diabetolog|nephrolog|radiolog|pathology|general practitioner|physician)/i, 5], [/\b(patients?|consultation|appointment|opd|diagnos|treatment|health ?check)\b/i, 2], [/\b(skin|hair|eye|heart|bone|kidney|liver|spine|joint|fertility|ivf|child)\s+(care|clinic|specialist|doctor|hospital|centre|center)\b/i, 4]],
+  recycling: [[/\b(plastic recycl\w+|recycl\w+ (plants?|machines?|machinery|lines?|systems?)|plastic (waste|scrap)|pet recycl\w+|recycled (plastic|hdpe|ldpe|pp|pet|granules|pellets))\b/i, 7], [/\b(granulat\w+|pelleti[sz]\w+|extruders?|extrusion|shredders?|agglomerat\w+|densifiers?|regrind|washing lines?|r-?pet|hdpe|ldpe|lldpe|flakes?|crushers?|compactors?|blown film|scrap)\b/i, 4], [/\b(recycl\w+|reprocess\w+|reclaim\w+|waste management|epr|post.consumer|post.industrial)\b/i, 3], [/\b(plastics?|polymers?|polythene|pvc)\b/i, 1.5]],
+  chemicals: [[/\b(chemicals?|chemical manufactur\w+|speciality|specialty|formulations?)\b/i, 5], [/\b(pickling|passivation|degreasing|descaling|surfactants?|solvents?|acids?|alkal\w+|resins?|additives?|reagents?|detergents?|inhibitors?|coagulants?|flocculants?|antiscalants?|biocides?|lubricants?|coatings?|adhesives?|dyes?|pigments?)\b/i, 3], [/\b(sds|msds|cas no|purity|reach|batch traceab\w+|technical data sheets?|tds|drums?|iso ?tanks?)\b/i, 3], [/\b(water treatment|boilers?|cooling towers?|effluent|metal (finishing|treatment)|surface (treatment|finishing)|galvaniz\w+|electroplating)\b/i, 3]],
   realestate: [[/\breal estate\b/i, 7], [/\b(realtors?|realty|estate agents?|property (dealers?|consultants?|advisors?|management)|propert(y|ies) (for|to) (sale|rent|lease)|builders and developers|real estate developers?|property developers?|housing projects?|residential projects?|commercial projects?)\b/i, 6], [/\b(apartments?|flats?|villas?|bhk|penthouses?|townhouses?|row ?houses?|duplex|plots?|township|gated communit\w+|farmhouses?|bungalows?)\b/i, 4], [/\b(rera|possession|carpet area|super built.?up|sq\.? ?ft|sqft|sq\.? ?yards?|floor plans?|site visit)\b/i, 4], [/\b(office space|retail space|warehouse space|leasing|co-?working|commercial (space|property|real estate)|business park|it park)\b/i, 3], [/\b(land|farmland|agricultural land|na plots?)\b/i, 2], [/\b(buy|sell|rent|lease)\b.{0,24}\b(propert\w+|homes?|houses?|flats?)\b/i, 3]],
-  electronics: [[/\b(electronics?|electrical|semiconductors?|pcbs?|circuits?|embedded|inverters?|ups|transformers?|capacitors?|resistors?|relays?|sensors?|microcontrollers?|iot|power supply|power supplies|smps|batter(y|ies)|solar|leds?|cables?|connectors?|switchgear|automation|plc|drives?|vfd)\b/i, 4], [/\b(manufactur|oem|odm|components?|distributor|industrial)\w*\b/i, 2], [/\b(iso 9001|ce certified|rohs|bis|ul listed)\b/i, 2]]
+  electronics: [[/\b(electronics?|electrical|semiconductors?|pcbs?|circuits?|embedded|inverters?|ups|transformers?|capacitors?|resistors?|relays?|sensors?|microcontrollers?|iot|power supply|power supplies|smps|batter(y|ies)|solar|leds?|cables?|connectors?|switchgear|automation|plc|drives?|vfd)\b/i, 4], [/\b(manufactur|oem|odm|components?|distributor|industrial)\w*\b/i, 0.4], [/\b(iso 9001|ce certified|rohs|bis|ul listed)\b/i, 0.4]]
 };
 // strong negatives: a dental clinic must not be read as a generic doctor unless it is clearly both
 const SPECIALTIES = {
@@ -30,6 +34,8 @@ const SPECIALTIES = {
 };
 
 export const SEGMENTS = {
+  recycling: [['machinery', 'Recycling machinery maker'], ['processor', 'Recycler or regranulator'], ['collector', 'Collector, trader or EPR']],
+  chemicals: [['industrial', 'Industrial and specialty'], ['surface', 'Metal and surface treatment'], ['water', 'Water treatment'], ['distributor', 'Distributor or trader']],
   realestate: [['residential', 'Residential'], ['luxury', 'Luxury'], ['commercial', 'Commercial'], ['plots', 'Plots and land'], ['mixed', 'Residential and commercial']],
   electronics: [['manufacturer', 'Manufacturer (B2B)'], ['distributor', 'Distributor or catalogue'], ['brand', 'Product brand']],
   doctors: [['clinic', 'Clinic'], ['solo', 'Individual doctor'], ['hospital', 'Hospital or multi doctor centre'], ['wellness', 'Wellness and holistic']],
@@ -51,6 +57,12 @@ export function segmentOf(industry, sig = {}) {
     segment = forced || (sc.commercial >= 2 && sc.residential >= 2 && Math.min(sc.commercial, sc.residential) >= Math.max(sc.commercial, sc.residential) * 0.6 ? 'mixed' : lead === 'luxury' && sc.luxury < Math.max(2, sc.residential * 0.5) ? 'residential' : lead);
     const dev = count(t, /\b(builders?|developers?|projects?|rera|possession|township|constructions?|launch(ed|es)?|ongoing|completed)\b/), ag = count(t, /\b(brokers?|brokerage|realtors?|agents?|consultants?|listings?|buy sell rent|dealers?|property management|advisors?)\b/);
     role = sig.role === 'developer' || sig.role === 'agency' ? sig.role : (ag > dev ? 'agency' : 'developer');
+  } else if (industry === 'recycling') {
+    const sc = { machinery: count(t, /\b(machin\w+|extruders?|shredders?|agglomerat\w+|densifiers?|plants?|equipment|systems?|grinders?|granulators?|compactors?|washing lines?|manufactur\w+ of)\b/), processor: count(t, /\b(granules|pellets|recycled (hdpe|ldpe|pp|pet|plastic)|regrind|flakes|compounds?|masterbatch|regranulat\w+|reprocess\w+)\b/), collector: count(t, /\b(collect\w+|scrap (dealers?|traders?)|waste management|epr|aggregat\w+|procure\w+|buyers? of|traders?)\b/) };
+    segment = forced || (sc.machinery >= sc.processor && sc.machinery >= 2 ? 'machinery' : sc.collector > sc.processor ? 'collector' : pick(sc, 'processor'));
+  } else if (industry === 'chemicals') {
+    const sc = { surface: count(t, /\b(pickling|passivation|degreas\w+|descal\w+|galvaniz\w+|metal (finishing|treatment)|electroplat\w+|polish\w+|surface (treatment|finishing))\b/), water: count(t, /\b(water treatment|boilers?|cooling towers?|antiscal\w+|effluent|coagulants?|flocculants?|membranes?|ro plants?)\b/), distributor: count(t, /\b(distributors?|traders?|trading|dealers?|stockists?|importers?|exporters?)\b/) };
+    segment = forced || (sc.surface >= 2 ? 'surface' : sc.water >= 2 ? 'water' : sc.distributor >= 2 ? 'distributor' : 'industrial');
   } else if (industry === 'electronics') {
     const sc = { manufacturer: count(t, /\b(manufactur\w+|oem|odm|factory|plant|b2b|industrial|custom|engineering|assembly|pcb|fabricat\w+)\b/), distributor: count(t, /\b(distribut\w+|dealers?|suppliers?|trading|wholesale|stockists?|authori[sz]ed|catalogue|catalog|store)\b/), brand: count(t, /\b(shop now|buy online|consumer|smart home|gadgets?|d2c|retail|wearables?|cart|add to cart)\b/) };
     segment = forced || pick(sc, 'manufacturer');
