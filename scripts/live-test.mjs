@@ -13,9 +13,9 @@ for (const [i, l] of leads.entries()) {
   const ms = Date.now() - t0, p = j.profile;
   if (p) fs.writeFileSync(`${out}/${i}.json`, JSON.stringify(p, null, 1));
   const f = p && p.meta.found;
-  rows.push({ company: l.company.slice(0, 28), status, s: (ms / 1000).toFixed(1), prod: f ? f.products : '-', img: f ? f.images : '-', logo: f ? (f.logo ? 'Y' : 'n') : '-', color: f ? (f.brandColor ? p.colors.primary : 'n') : '-', contact: f ? f.contact : '-', err: j.error || '' });
+  rows.push({ company: l.company.slice(0, 24), status, s: (ms / 1000).toFixed(1), prod: f ? f.products : '-', withImg: p ? p.products.filter(x => x.image).length : '-', sec: p && p.sections ? p.sections.map(x => x.kind[0]).join('') : '-', img: f ? f.images : '-', logo: f ? (f.logo ? 'Y' : 'n') : '-', color: f ? (f.brandColor ? p.colors.primary : 'n') : '-', contact: f ? f.contact : '-', err: j.error || '' });
   console.log(JSON.stringify(rows.at(-1)));
   if (i % 18 === 17) await new Promise(r => setTimeout(r, 61000)); // stay under the per-IP rate limit
 }
 const ok = rows.filter(r => r.status === 200);
-console.log(`\nOK ${ok.length}/${rows.length}; >9s: ${rows.filter(r => +r.s > 9).length}; with products: ${ok.filter(r => r.prod > 0).length}; with logo: ${ok.filter(r => r.logo === 'Y').length}; with brand colour: ${ok.filter(r => r.color !== 'n').length}`);
+console.log(`\nOK ${ok.length}/${rows.length}; >9s: ${rows.filter(r => +r.s > 9).length}; with products: ${ok.filter(r => r.prod > 0).length}; with logo: ${ok.filter(r => r.logo === 'Y').length}; total products: ${ok.reduce((a, r) => a + (+r.prod || 0), 0)}; leads with sections: ${ok.filter(r => r.sec && r.sec !== '-' && r.sec !== '').length}; with brand colour: ${ok.filter(r => r.color !== 'n').length}`);
