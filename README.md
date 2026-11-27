@@ -1,4 +1,4 @@
-# Design Generator V7
+# Design Generator V8
 
 Log in, pick an industry, paste a company website, and get **five distinct, mobile-ready, five-page redesign concepts** built from that company's real content. Share them with the client through a private link that stops working after 48 hours.
 
@@ -6,7 +6,15 @@ Log in, pick an industry, paste a company website, and get **five distinct, mobi
 login → industry → website or lead → /api/analyze reads the live site → profile → 5 designs → share link
 ```
 
-## What V7 adds
+## What V8 adds
+
+- **Plastic recycling and Chemicals** join the home page as new industries, detected from the website, Google Business text, notes and sheets. Plastic recycling kinds: machinery maker, recycler or regranulator, collector or trader. Chemicals kinds: industrial and specialty, metal and surface treatment, water treatment, distributor. The extractor (`lib/industrial.js`) reads stat cards as counters, "industries served" and "materials" cards, quality and standards cards and process steps from the page. Tested on two real sites (see `docs/RESEARCH-INDUSTRIAL-CLINICS.md`).
+- **Eleven industrial designs** for electronics, plastic recycling and chemicals: Forge, Lab Notes, Closed Loop, Pellet Pop, Flow, Catalogue Pro, Plant Tour and Brand Lab (creative, each with its own fonts, hero and signature effect) plus Corporate WordPress, Catalogue WordPress and Elementor Style (plain). RFQ basket on every one.
+- **Seven more doctor and dentist designs:** Little Smiles, Luxe Aesthetic, Care Compass (emergency bar and live treatment search), Mono Clinic, Calm Breath, Glass Tech (creative) and Health Pro WordPress (plain). Segment weights steer them (kids, cosmetic, hospital, wellness, implants).
+- **Shared effects module** `public/engine/fx.js`: parallax, drag scrollers, tilt, magnetic buttons, cursor label, spotlight, tabs, live filters, calculators, step light-up and a drawing timeline. It respects reduced motion and skips pointer effects on touch devices.
+- **More stock photos** for plastic recycling, chemicals and process equipment, and more for electronics, dentists and doctors, captioned "Illustrative image".
+
+## What V7 added
 
 - **Real estate.** A fourth industry with eight designs: six creative (Skyline, Atelier, Homestead, Listings, Terra, Workplace) with parallax, slow zoom, drag galleries, tilt cards, magnetic buttons, live filters and calculators, plus two plain WordPress/Elementor style (Property Search, Developer Classic). Research notes: `docs/RESEARCH-REAL-ESTATE.md`.
 - **Kind of business, not just industry.** Every industry now has segments and the generator suggests designs that fit: real estate (residential, luxury, commercial, plots, mixed; developer or agency), electronics (manufacturer, distributor, product brand), doctors (clinic, individual, hospital, wellness) and dentists (general, cosmetic, braces, implants, kids). It is detected from the website, Google Business text, LinkedIn text, notes and sheets, shown with the reasons, and changed with the **Focus** selects above the designs.

@@ -1,6 +1,6 @@
 {
   "name": "web-design-generator",
-  "version": "7.0.0",
+  "version": "8.0.0",
   "description": "Pick an industry, paste a company website, get 5 distinct five-page redesign concepts.instantly.",
   "type": "module",
   "main": "local-server.js",

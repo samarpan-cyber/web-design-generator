@@ -46,7 +46,7 @@ async function run(label, viewport, doShare) {
   await page.reload(); await page.waitForSelector('.ind');
   ok(await page.locator('#gate').isVisible(), `${label}: stays logged in after a reload`);
 
-  ok(await page.locator('.ind').count() === 7 && await page.locator('.ind.ready').count() === 4, `${label}: 7 industries, Electronics, Dentists, Doctors and Real estate ready`);
+  ok(await page.locator('.ind').count() === 9 && await page.locator('.ind.ready').count() === 6, `${label}: 9 industries, six ready (Electronics, Plastic recycling, Chemicals, Dentists, Doctors, Real estate)`);
   await page.click('.ind.ready'); await page.waitForSelector('.lead');
   ok(await page.locator('.lead').count() === 19, `${label}: 19 leads load for a logged-in user`);
   await page.fill('#input', 'Temple Electromagnetics'); await page.press('#input', 'Enter');
@@ -124,6 +124,25 @@ async function runClinic() {
   await ctx.close();
 }
 
+async function runIndustrial(slug, name, gmb, notes, want, label) {
+  const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); const page = await ctx.newPage();
+  page.on('pageerror', e => errs.push(label + ': ' + e.message));
+  await page.goto(base); await page.waitForSelector('#login:not([hidden])'); await page.fill('#loginUser', USER); await page.fill('#loginPass', PASS); await page.click('#loginGo'); await page.waitForSelector('.ind');
+  ok(await page.locator(`a.ind[href="#/${slug}"]`).count() === 1, `${label}: tile is on the home page`);
+  await page.click(`a.ind[href="#/${slug}"]`); await page.waitForSelector('#startDetails'); await page.click('#startDetails'); await page.waitForSelector('#intakeDlg[open]');
+  await page.fill('#intakeForm [name=name]', name); await page.fill('#intakeForm [name=gmb]', gmb); await page.fill('#intakeForm [name=notes]', notes);
+  await page.click('#intakeGo'); await page.waitForSelector('#grid .card', { timeout: 15000 }); await page.waitForTimeout(2500);
+  const names = await page.locator('#grid .card .meta b').allInnerTexts();
+  ok(names.length === 5, `${label}: five designs from details alone (${names.join(', ')})`);
+  ok(page.url().endsWith(`#/${slug}/compare`), `${label}: URL stays in the ${slug} workspace`);
+  await page.click('[data-open="0"]'); await page.waitForTimeout(1500);
+  const txt = await page.frameLocator('#vFrame').locator('body').innerText();
+  ok(want.test(txt) && /Designed by Digifyo/.test(txt), `${label}: design shows the details and who designed it`);
+  const ov = await page.frameLocator('#vFrame').locator('html').evaluate(e => e.scrollWidth - innerWidth); ok(ov <= 2, `${label}: no horizontal overflow in the design`);
+  await page.screenshot({ path: `${out}/${label}-viewer.png` });
+  await ctx.close();
+}
+
 async function runEstate() {
   const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); const page = await ctx.newPage(); const label = 'realestate';
   page.on('pageerror', e => errs.push(label + ': ' + e.message));
@@ -156,7 +175,7 @@ async function runWidgets() {
   const ov = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth); ok(ov <= 2, `${label}: no horizontal overflow`);
   await ctx.close();
 }
-try { await run('desktop', { width: 1440, height: 900 }, true); await run('phone', { width: 390, height: 844 }, false); await runClinic(); await runEstate(); await runWidgets(); }
+try { await run('desktop', { width: 1440, height: 900 }, true); await run('phone', { width: 390, height: 844 }, false); await runClinic(); await runIndustrial('recycling', 'Greenloop Polymers', 'Category: Plastic recycling machinery manufacturer\nPhone: +91 98765 43210\nAddress: Plot 12, GIDC, Vapi', 'Shredders, washing lines and pelletizing extruders', /Greenloop Polymers/, 'recycling'); await runIndustrial('chemicals', 'Aquaclean Chemicals', 'Category: Chemical manufacturer\nPhone: +91 98765 43211\nAddress: Plot 5, GIDC, Vasai', 'Pickling and passivation chemicals for stainless steel', /Aquaclean Chemicals/, 'chemicals'); await runEstate(); await runWidgets(); }
 finally { await b.close(); server.kill(); }
 console.log(errs.length ? 'ERRORS:\n' + errs.join('\n') : 'ALL GOOD');
 process.exit(errs.length ? 1 : 0);
