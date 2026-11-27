@@ -130,3 +130,12 @@ test('sections are still read when the body carries theme classes like no-sideba
   assert.equal(p.sections.length, 1);
   assert.equal(p.sections[0].kind, 'cards');
 });
+
+test('reads sections on sites that use h1 or h3 for section headings and wrap the page in a form', async () => {
+  const sec = (h, t) => `<section><h3>${h}</h3><p>${t}</p><div><div><img src="/a.jpg"><h4>First thing</h4><p>Something specific about the first thing here.</p></div><div><img src="/b.jpg"><h4>Second thing</h4><p>Something specific about the second thing here.</p></div><div><img src="/c.jpg"><h4>Third thing</h4><p>Something specific about the third thing here.</p></div></div></section>`;
+  const html = `<!doctype html><html><head><title>Acme</title></head><body><form id="aspnetForm"><div>${sec('What we do', 'We do a lot of useful things for plants.')}${sec('How we work', 'We work with care and a bias for shipping.')}${sec('Why us', 'Because the details are not optional here.')}</div></form></body></html>`;
+  const p = await extractProfile('store.example', { fetcher: site({ 'https://store.example/': html }) });
+  assert.ok(p.sections.length >= 2, 'sections: ' + p.sections.map(s => s.heading).join(','));
+  assert.equal(p.sections[0].heading, 'What we do');
+  assert.equal(p.sections[0].items.length, 3);
+});
