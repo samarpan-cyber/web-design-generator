@@ -11,7 +11,7 @@ const root = path.join(here, 'public');
 const PORT = process.env.PORT || 3000;
 if (!process.env.WDG_AUTH) { try { process.env.WDG_AUTH = fs.readFileSync(path.join(here, 'data/wdg-auth.json'), 'utf8').trim(); } catch { /* not configured */ } }
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.webp': 'image/webp' };
-const API = new Set(['login', 'logout', 'me', 'leads', 'analyze', 'share']);
+const API = new Set(['login', 'logout', 'me', 'leads', 'analyze', 'share', 'intake']);
 
 function readBody(req, limit = 400_000) {
   return new Promise((resolve, reject) => {
@@ -27,7 +27,7 @@ http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://x');
     const m = url.pathname.match(/^\/api\/([a-z]+)$/);
     if (m && API.has(m[1])) {
-      const body = req.method === 'POST' ? await readBody(req) : {};
+      const body = req.method === 'POST' ? await readBody(req, m[1] === 'intake' ? 6_500_000 : 400_000) : {};
       const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket.remoteAddress;
       const out = await handle(m[1], { method: req.method, headers: req.headers, ip, body, query: Object.fromEntries(url.searchParams) });
       return send(res, out.status, out.json, out.headers);
