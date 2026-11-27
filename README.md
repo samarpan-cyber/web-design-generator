@@ -1,4 +1,4 @@
-# Design Generator V3
+# Design Generator V4
 
 Log in, pick an industry, paste a company website, and get **five distinct, mobile-ready, five-page redesign concepts** built from that company's real content. Share them with the client through a private link that stops working after 48 hours.
 
@@ -6,7 +6,14 @@ Log in, pick an industry, paste a company website, and get **five distinct, mobi
 login → industry → website or lead → /api/analyze reads the live site → profile → 5 designs → share link
 ```
 
-## What V3 adds
+## What V4 adds
+
+- **Plain, WordPress-style designs.** Four extra designs (Corporate Classic, Industrial Pro, Clean Catalog, Modern Business) that look hand-built on WordPress with Elementor: Open Sans, Roboto, Lato and Poppins, top bar, photo hero, icon boxes, grey placeholders where there is no photo. Each set of five is three creative plus two plain designs. **Shuffle set** picks another combination from the library (`public/engine/index.js`, add a template there and it joins the pool).
+- **Sites that cannot be crawled.** **Add data** takes an Excel or CSV product list, a sitemap.xml, Google Business text or JSON, or a screenshot. Screenshots are read by a vision model when `ANTHROPIC_API_KEY` is set (optional `VISION_MODEL`).
+- **Designed by Digifyo.** Every design and every share page carries the designer's name, call, WhatsApp and email. Set `DESIGNER_COMPANY`, `DESIGNER_NAME`, `DESIGNER_ROLE`, `DESIGNER_PHONE`, `DESIGNER_WHATSAPP`, `DESIGNER_EMAIL`, `DESIGNER_SITE`. Nothing is invented: empty fields are hidden.
+- **CRM integration.** The same engine runs inside Digifyo CRM v6 (leads in, links on crm.digifyo.com, open tracking). See HOSTINGER.md.
+
+## What V3 added
 
 - **Login.** Only people with a username and password can open the generator, scrape sites or see the lead list. Passwords are never stored: only salted scrypt hashes, in one server-side setting.
 - **Private client links.** "Share with client" creates a link that shows only the five designs, needs no login, and expires after **48 hours**. Clients can explore and switch themes and devices, but cannot edit or download.
