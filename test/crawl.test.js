@@ -101,3 +101,24 @@ test('reads the homepage section by section', async () => {
   assert.ok(!byHead['Quick links'], 'footer headings skipped');
   assert.equal(p.hero.title, 'Precision power');
 });
+
+test('menu pages become products with real images and descriptions when there is no grid', async () => {
+  const menuNav = `<header><nav><ul><li><a href="/">Home</a></li><li><a href="/pcb-assembly/">PCB Assembly</a></li><li><a href="/pcb-design/">PCB Design</a></li><li><a href="/box-build/">Box Build</a></li><li><a href="/contact-us/">Contact Us</a></li></ul></nav></header>`;
+  const detail = (t, i) => page(`${t} | Acme`, '', `<meta property="og:image" content="/img/${i}.jpg"><meta name="description" content="${t} done properly by our team.">`);
+  const f = site({ 'https://store.example/': page('Acme', menuNav + '<main><h1>Acme</h1></main>'), 'https://store.example/pcb-assembly/': detail('PCB Assembly', 1), 'https://store.example/pcb-design/': detail('PCB Design', 2), 'https://store.example/box-build/': detail('Box Build', 3), 'https://store.example/contact-us/': page('Contact') });
+  const p = await extractProfile('store.example', { fetcher: f });
+  const names = p.products.map(x => x.name);
+  assert.deepEqual(names.slice(0, 3), ['PCB Assembly', 'PCB Design', 'Box Build']);
+  assert.ok(!names.includes('Contact Us'));
+  assert.equal(p.products[0].image, 'https://store.example/img/1.jpg');
+  assert.match(p.products[1].description, /done properly/);
+  assert.ok(!f.calls.some(u => /contact-us/.test(u)), 'did not waste a fetch on the contact page');
+});
+
+test('takes products from a "what we make" cards section when the site has no catalogue', async () => {
+  const body = `<main><h1>Acme IoT</h1><section><h2>What we manufacture</h2><div><div class="c"><img src="/a.jpg"><h3>Smart Meter</h3><p>Tracks energy use in real time for plants.</p></div><div class="c"><img src="/b.jpg"><h3>Gas Sensor</h3><p>Detects leaks long before they matter to anyone.</p></div><div class="c"><img src="/c.jpg"><h3>Edge Gateway</h3><p>Bridges field devices and the cloud securely.</p></div></div></section></main>`;
+  const p = await extractProfile('store.example', { fetcher: site({ 'https://store.example/': page('Acme IoT', body) }) });
+  assert.deepEqual(p.products.slice(0, 3).map(x => x.name), ['Smart Meter', 'Gas Sensor', 'Edge Gateway']);
+  assert.equal(p.products[0].image, 'https://store.example/a.jpg');
+  assert.equal(p.products.length, 3, 'no duplicates from the cards fallback');
+});
