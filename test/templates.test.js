@@ -78,7 +78,7 @@ for (const t of TEMPLATES) {
     $('script').each((_, el) => assert.ok(!/<\/?script/i.test($(el).html() || ''), 'script breakout'));
     $('*').each((_, el) => {
       for (const [k, v] of Object.entries(el.attribs || {})) {
-        if (/^on/i.test(k)) assert.match(v, /^this\.onerror=null;|^this\.replaceWith|^document\./, `unexpected handler ${k}=${v}`);
+        if (/^on/i.test(k)) assert.match(v, /^this\.onerror=null;|^this\.replaceWith|^this\.remove\(\)|^this\.parentNode\.classList\.add|^document\./, `unexpected handler ${k}=${v}`);
         if (['href', 'src'].includes(k)) assert.ok(!/^\s*javascript:/i.test(v), `javascript: URL in ${k}`);
       }
     });

@@ -1,5 +1,6 @@
 // Shared helpers for all templates. Pure functions - works in the browser and in Node (tests/screenshots).
 import { runtime } from './runtime.js';
+import { stockPhotos, goodPhoto } from './stock.js';
 import { noDash, brief, topicOf, NOUN, headline, voiceCopy, describe, sectorLine } from './copy.js';
 
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -113,10 +114,19 @@ export function buildModel(p, opts = {}) {
   m.products = products; m.placeholders = placeholders;
   m.topic = topicOf(m); m.noun = NOUN[m.topic];
 
-  // images: every slot gets a different picture, art fills any gap
-  const gallery = [...new Set([safeUrl(p.ogImage), ...(p.images || []).map(i => safeUrl(i.src))].filter(Boolean))];
-  const slot = (k, label) => { const a = art((p.host || name) + k, brand, label || 'module sensor chip'); return gallery[k] ? { src: gallery[k], art: a, name, isPhoto: true } : { src: a, art: a, name, isPhoto: false }; };
+  // images: the prospect's own good photos first, then stock photography for the gaps, procedural art only if a stock photo fails to load
+  const ind = p.industry || 'electronics';
+  const own = [...new Map([[safeUrl(p.ogImage), { src: safeUrl(p.ogImage), w: 1200 }], ...(p.images || []).filter(goodPhoto).map(i => [safeUrl(i.src), { src: safeUrl(i.src), w: i.w || 0, alt: i.alt }])]).values()].filter(i => i.src);
+  const stock = stockPhotos(ind, p.host || name, opts.assetBase || undefined);
+  let si = 0;
+  const slot = (k, label) => {
+    const a = art((p.host || name) + k, brand, label || 'module sensor chip');
+    if (own[k]) return { src: own[k].src, art: a, name, isPhoto: true };
+    const st = stock[si++ % Math.max(1, stock.length)];
+    return st ? { src: st.src, art: a, name, isPhoto: true, isStock: true } : { src: a, art: a, name, isPhoto: false };
+  };
   m.img = { hero: slot(0, 'sensor module'), about: slot(1, 'pcb board'), wide: slot(2, 'chip'), extra: slot(3, 'wave scope') };
+  m.gallery = [m.img.hero.src, m.img.about.src, m.img.wide.src, m.img.extra.src]; m.ownPhotos = own.length; m.stockUsed = [m.img.hero, m.img.about, m.img.wide, m.img.extra].some(x => x.isStock);
 
   // text: hero line from the voice bank, supporting line from the site (one sentence), about from the site if distinct
   const raw = clean(p.description || p.about || '');
@@ -261,7 +271,7 @@ html.js [data-reveal]{opacity:0;transform:translate3d(0,22px,0);transition:opaci
 html.js [data-reveal="left"]{transform:translate3d(-28px,0,0)}html.js [data-reveal="right"]{transform:translate3d(28px,0,0)}html.js [data-reveal="zoom"]{transform:scale(.96)}
 html.js [data-reveal].in{opacity:1;transform:none}
 #prog{position:fixed;left:0;top:0;height:3px;width:100%;background:linear-gradient(90deg,var(--brand),var(--brand2));transform-origin:0 50%;transform:scaleX(0);z-index:200;will-change:transform}
-.plate{overflow:hidden;position:relative;contain:paint}.plate img{width:100%;height:100%;object-fit:cover}.plate.photo{background:#fff}.plate.photo img{object-fit:contain;padding:6%}
+.plate{overflow:hidden;position:relative;contain:paint}.plate img{width:100%;height:100%;object-fit:cover}.plate.photo{background:#fff}.plate.photo img{object-fit:contain;padding:6%}.plate.stock{background:var(--card,#e9edf3)}.plate.stock img{object-fit:cover;padding:0}
 .hide{display:none!important}
 html.paused :is(.amb,.amb *){animation-play-state:paused!important}
 .hs{padding:clamp(52px,7vw,104px) 0;position:relative}.hs-in{width:min(var(--hs-w,1180px),100% - 40px);margin-inline:auto}
@@ -320,7 +330,7 @@ export function shell(m, { tpl, fonts, css, header = '', footer = '', pages, scr
 }
 
 /* ---------------- tiny markup helpers shared by templates ---------------- */
-export const media = (x, cls = '') => `<div class="plate ${x.isPhoto ? 'photo' : 'art'} ${cls}"><img src="${esc(x.src)}" alt="${esc(x.name)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${x.art}';this.parentNode.classList.remove('photo')"></div>`;
+export const media = (x, cls = '') => `<div class="plate ${x.isPhoto ? 'photo' : 'art'}${x.isStock ? ' stock' : ''} ${cls}"><img src="${esc(x.src)}" alt="${esc(x.name)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${x.art}';this.parentNode.classList.remove('photo')"></div>`;
 export const logoMark = m => m.logo
   ? `<img class="logo-img" src="${esc(m.logo)}" alt="${esc(m.name)}" onerror="this.replaceWith(Object.assign(document.createElement('b'),{className:'logo-fallback',textContent:'${esc(m.initials)}'}))">`
   : `<b class="logo-fallback">${esc(m.initials)}</b>`;

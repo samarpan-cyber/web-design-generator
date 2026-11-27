@@ -3,6 +3,7 @@
 import { esc, safeUrl, shell, tones, mix, logoMark, socialLinks, designerCard, normDesigner, menuBtn, goLink } from './common.js';
 import { noDash, brief } from './copy.js';
 import { clinicCopy, treatmentsFor, clinicHeadline } from './clinic-copy.js';
+import { stockPhotos, goodPhoto } from './stock.js';
 
 const GF = 'https://fonts.googleapis.com/css2?family=';
 export const CLINIC_VARIANTS = [
@@ -39,12 +40,14 @@ function model(profile, opts, v) {
   const defaults = treatmentsFor(industry, spec).map(t => ({ name: t.name, desc: t.desc, img: '', real: false }));
   const services = [...found.slice(0, 10)]; for (const d of defaults) { if (services.length >= 8) break; if (!seen.has(d.name.toLowerCase())) { seen.add(d.name.toLowerCase()); services.push(d); } }
   const usedDesc = new Set(); for (const s of services) { if (!s.desc || usedDesc.has(s.desc.toLowerCase())) { const dd = defaults.find(d => d.name === s.name); s.desc = dd ? dd.desc : `Ask the clinic about ${s.name.toLowerCase()}.`; } usedDesc.add(s.desc.toLowerCase()); }
-  const gallery = [...new Set([safeUrl(p.ogImage), ...(p.images || []).map(i => safeUrl(i.src))].filter(Boolean))];
+  const own = [...new Set([safeUrl(p.ogImage), ...(p.images || []).filter(goodPhoto).map(i => safeUrl(i.src))].filter(Boolean))];
+  const stock = stockPhotos(industry, p.host || name, opts.assetBase || undefined); // the prospect's own photos first, stock only fills the gaps
+  const gallery = [0, 1, 2, 3].map(k => own[k] || (stock[k] && stock[k].src) || '');
   const raw = clean(p.description || p.about || '').replace(/\bDr\.\s+/g, 'Dr '); const sub = brief(raw, 140); const aboutSrc = brief(clean(p.about || '').replace(/\bDr\.\s+/g, 'Dr '), 220);
   let aboutLine = aboutSrc && aboutSrc !== sub ? aboutSrc : ''; if (!aboutLine && raw) { const s2 = (raw.match(/[^.!?]+[.!?]+/g) || [])[1]; if (s2) aboutLine = brief(s2.trim(), 220); }
   const ct = p.contacts || {}; const dz = normDesigner(opts.designer, opts.agency);
   const m = {
-    name, initials: name.split(/[\s/&,-]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'C', brand, industry, spec, c, services, gallery, sub: sub || (industry === 'dentists' ? 'Check ups, treatments and cosmetic care for every age.' : 'Consultations, tests and long term care, with time for your questions.'), aboutLine,
+    name, ownPhotos: own.length, stockUsed: gallery.some((g, k) => g && !own[k]), initials: name.split(/[\s/&,-]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'C', brand, industry, spec, c, services, gallery, sub: sub || (industry === 'dentists' ? 'Check ups, treatments and cosmetic care for every age.' : 'Consultations, tests and long term care, with time for your questions.'), aboutLine,
     headline: clinicHeadline(industry, [...name].reduce((a, ch) => a + ch.charCodeAt(0), 0)),
     doctors: (ck.doctors || []).slice(0, 4).map(d => ({ name: clean(d.name), title: clean(d.title), image: safeUrl(d.image) })), hours: (ck.hours || []).map(clean).filter(Boolean).slice(0, 6), rating: ck.rating && ck.rating.value ? ck.rating : null, emergency: clean(ck.emergency || ''), bookingUrl: safeUrl(ck.bookingUrl),
     quotes: ((p.sections || []).find(s => s.kind === 'quotes') || { quotes: [] }).quotes.slice(0, 3).map(q => ({ text: clean(q.text), author: clean(q.author) })), logos: ((p.sections || []).find(s => s.kind === 'logos') || { logos: [] }).logos.slice(0, 8).map(l => ({ src: l.src, alt: clean(l.alt) })),
@@ -121,7 +124,7 @@ ${v.serv === 'bento' ? `.s-bento .sv{padding:24px}.s-bento .sv:nth-child(1){back
 `;
 };
 
-function phBox(m, cls, img) { return `<div class="ph ${cls}">${img ? `<img src="${esc(img)}" alt="" loading="lazy" onerror="this.remove()">` : ''}${ico(m.industry === 'dentists' ? 'tooth' : 'cross')}</div>`; }
+function phBox(m, cls, img) { return `<div class="ph ${cls}">${img ? `<img src="${esc(img)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ico(m.industry === 'dentists' ? 'tooth' : 'cross')}</div>`; }
 
 export function renderClinic(vi, profile, opts = {}) {
   const v = CLINIC_VARIANTS[vi % CLINIC_VARIANTS.length]; const m = model(profile, { fallbackBrand: v.fallback, ...opts }, v); const c = m.c, nav = c.nav, dz = m.designer;
@@ -139,7 +142,7 @@ export function renderClinic(vi, profile, opts = {}) {
   const tx = `${kick}<h1 data-reveal data-delay="60">${esc(m.headline)}</h1><p class="lead" data-reveal data-delay="100">${esc(m.sub)}</p><div class="bt" data-reveal data-delay="140">${book()}${callB()}</div>${rate}`;
   let heroH = '';
   if (v.hero === 'arch') heroH = `<section class="hero h-arch hs"><div class="w"><div>${tx}</div>${phBox(m, 'pic', hero).replace('class="ph pic"', 'class="ph pic" data-reveal="zoom"')}</div></section>`;
-  else if (v.hero === 'chips') heroH = `<section class="hero h-chips hs"><div class="w"><div>${tx}</div><div class="ph pic" data-reveal="zoom">${hero ? `<img src="${esc(hero)}" alt="" onerror="this.remove()">` : ico(m.industry === 'dentists' ? 'tooth' : 'cross')}<span class="chip c1">${ico('shield')} Gentle care</span><span class="chip c2">${ico('cal')} Easy booking</span></div></div></section>`;
+  else if (v.hero === 'chips') heroH = `<section class="hero h-chips hs"><div class="w"><div>${tx}</div><div class="ph pic" data-reveal="zoom">${hero ? `<img src="${esc(hero)}" alt="" decoding="async" onerror="this.remove()" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit">` : ico(m.industry === 'dentists' ? 'tooth' : 'cross')}<span class="chip c1">${ico('shield')} Gentle care</span><span class="chip c2">${ico('cal')} Easy booking</span></div></div></section>`;
   else if (v.hero === 'doctor') heroH = `<section class="hero h-doctor hs"><div class="w">${phBox(m, 'pic', (m.doctors[0] && m.doctors[0].image) || hero)}<div class="tx">${kick}<h1 data-reveal data-delay="60">${esc(m.headline)}</h1><p class="lead" data-reveal>${esc(m.sub)}</p><div class="bt" data-reveal>${book()}${callB()}</div>${rate}</div></div></section>`;
   else if (v.hero === 'split') heroH = `<section class="hero h-split hs"><div class="w"><div>${tx}</div>${phBox(m, 'pic', hero)}</div></section>`;
   else if (v.hero === 'overlay') heroH = `<section class="hero h-over hs" ${hi}><div class="w">${tx}</div></section>`;
@@ -153,7 +156,7 @@ export function renderClinic(vi, profile, opts = {}) {
   const svHome = m.services.slice(0, 6).map((s, i) => `<a class="sv" href="#/treatments" data-go="treatments" data-reveal data-delay="${(i % 3) * 70}"><div class="ic">${ico(svcIcon(m, i))}</div><b>${esc(s.name)}</b></a>`).join('');
   const svFull = m.services.map((s, i) => `<article class="sv" data-reveal data-delay="${(i % 3) * 70}"><div class="ic">${ico(svcIcon(m, i))}</div><h3>${esc(s.name)}</h3><p>${esc(s.desc)}</p>${v.serv === 'index' ? `<a class="btn line sm" href="#/book" data-go="book">${esc(nav.book)}</a>` : ''}</article>`).join('');
   const homeAboutText = m.aboutLine || m.sub; const aboutPoints = m.c.why.map(w => w[0]);
-  const aboutBlock = `<section class="sec hs"><div class="w two">${phBox(m, 'pic', m.gallery[1] || '').replace('class="ph pic"', 'class="ph pic" data-reveal="left"')}<div data-reveal="right"><span class="k">${esc(c.aboutK)}</span><h2 class="h2 hs-t">${esc(c.aboutT)}</h2>${m.aboutLine ? `<p class="sub">${esc(m.aboutLine)}</p>` : ''}<ul class="cl">${aboutPoints.slice(0, 4).map(b => `<li>${ico('check')}<span>${esc(b)}</span></li>`).join('')}</ul>${book()}</div></div></section>`;
+  const aboutBlock = `<section class="sec hs"><div class="w two">${phBox(m, 'pic', (v.hero === 'form' ? m.gallery[0] : m.gallery[1]) || '').replace('class="ph pic"', 'class="ph pic" data-reveal="left"')}<div data-reveal="right"><span class="k">${esc(c.aboutK)}</span><h2 class="h2 hs-t">${esc(c.aboutT)}</h2>${m.aboutLine ? `<p class="sub">${esc(m.aboutLine)}</p>` : ''}<ul class="cl">${aboutPoints.slice(0, 4).map(b => `<li>${ico('check')}<span>${esc(b)}</span></li>`).join('')}</ul>${book()}</div></div></section>`;
   const servHome = `<section class="sec alt hs"><div class="w">${head(c.servK, c.servT, c.servS, true)}<div class="sg s-${v.serv === 'index' ? 'tiles' : v.serv}">${svHome}</div></div></section>`;
   const counters = m.stats.length >= 2 ? `<section class="cnt hs"><div class="w">${m.stats.map(s => `<div data-reveal><b data-count="${esc(s.value)}" data-suffix="${esc(s.suffix)}">0</b><span>${esc(s.label)}</span></div>`).join('')}</div></section>` : '';
   const stepsH = `<section class="sec hs"><div class="w">${head(c.stepsK, c.stepsT, '', true)}<div class="stp">${c.steps.map(([a, b], i) => `<div class="st" data-reveal data-delay="${i * 70}"><b>${i + 1}</b><h3>${esc(a)}</h3><p>${esc(b)}</p></div>`).join('')}</div></div></section>`;

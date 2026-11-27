@@ -30,7 +30,7 @@ async function load() {
   render(); route();
 }
 
-const htmlFor = (t, o = {}) => t.render(state.profile, { agency: state.agency, designer: state.designer, ...o });
+const htmlFor = (t, o = {}) => t.render(state.profile, { agency: state.agency, designer: state.designer, assetBase: location.origin + '/stock/', ...o });
 
 function renderBy(d) {
   const box = $('#shBy'); if (!box || !d) return; const wa = String(d.whatsapp || d.phone || '').replace(/\D/g, '');

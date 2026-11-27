@@ -182,7 +182,7 @@ function summarize(p, el) {
 /* ---------------- results grid ---------------- */
 let io, ro;
 const themeOpt = () => (state.mode === 'auto' ? undefined : state.mode);
-const htmlFor = (t, o = {}) => t.render(state.profile, { theme: themeOpt(), agency: state.agency, designer: state.designer, ...o });
+const htmlFor = (t, o = {}) => t.render(state.profile, { theme: themeOpt(), agency: state.agency, designer: state.designer, assetBase: location.origin + '/stock/', ...o });
 const effectiveTheme = t => (state.mode === 'auto' ? t.defaultTheme : state.mode);
 function post(frame, msg) { try { frame.contentWindow.postMessage(msg, '*'); } catch { /* ignore */ } }
 

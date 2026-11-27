@@ -10,7 +10,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(here, 'public');
 const PORT = process.env.PORT || 3000;
 if (!process.env.WDG_AUTH) { try { process.env.WDG_AUTH = fs.readFileSync(path.join(here, 'data/wdg-auth.json'), 'utf8').trim(); } catch { /* not configured */ } }
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.webp': 'image/webp' };
+const MIME = { '.jpg': 'image/jpeg', '.txt': 'text/plain; charset=utf-8', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.webp': 'image/webp' };
 const API = new Set(['login', 'logout', 'me', 'leads', 'analyze', 'share', 'intake']);
 
 function readBody(req, limit = 400_000) {
@@ -41,6 +41,7 @@ http.createServer(async (req, res) => {
     fs.readFile(file, (err, data) => {
       if (err) { res.writeHead(404, { 'content-type': 'text/plain' }); return res.end('Not found'); }
       const h = { 'content-type': MIME[path.extname(file)] || 'application/octet-stream', 'cache-control': 'no-cache' };
+      if (p.startsWith('/stock/') && file.endsWith('.jpg')) h['cache-control'] = 'public, max-age=604800, immutable';
       if (p === '/share.html') Object.assign(h, { 'x-robots-tag': 'noindex, nofollow', 'referrer-policy': 'no-referrer', 'cache-control': 'no-store' });
       res.writeHead(200, h); res.end(data);
     });

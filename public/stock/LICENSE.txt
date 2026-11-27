@@ -1,0 +1,5 @@
+Photos in this folder come from Pexels (https://www.pexels.com) and are used under the Pexels License:
+free for personal and commercial use, no attribution required, but they may not be sold unmodified or used to
+imply endorsement by the people shown. manifest.json lists the Pexels photo id of every file
+(https://www.pexels.com/photo/<id>/). They appear only as ambient imagery in design concepts when a prospect's own
+website has no suitable photos; they are never presented as the prospect's own doctors, staff or products.
