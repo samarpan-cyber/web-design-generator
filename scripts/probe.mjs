@@ -7,5 +7,6 @@ for (const site of sites) {
   console.log(`\n== ${site}  ${((Date.now() - t0) / 1000).toFixed(1)}s  products=${p.products.length} (img ${p.products.filter(x => x.image).length})  sections=${(p.sections || []).map(s => s.kind + ':' + s.heading.slice(0, 22)).join(' | ')}`);
   console.log('   notes:', (p.notes || []).join('; '));
   console.log('   diag :', (p.meta.diag || []).map(d => `${d.page}=${d.found}[${(d.cards || []).join(',')}]`).join('  '));
+  console.log('   heads:', JSON.stringify(p.meta.counts), (p.meta.secDbg || []).join('  '));
   console.log('   first:', p.products.slice(0, 4).map(x => x.name).join(' / '));
 }
