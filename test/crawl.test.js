@@ -122,3 +122,11 @@ test('takes products from a "what we make" cards section when the site has no ca
   assert.equal(p.products[0].image, 'https://store.example/a.jpg');
   assert.equal(p.products.length, 3, 'no duplicates from the cards fallback');
 });
+
+test('sections are still read when the body carries theme classes like no-sidebar and modal-open', async () => {
+  const body = `<main><section><h2>Why choose us</h2><div><div><img src="/a.jpg"><h3>Built to last</h3><p>Every unit is burn-in tested before it ships out.</p></div><div><img src="/b.jpg"><h3>Local support</h3><p>Engineers on call across the region every day.</p></div><div><img src="/c.jpg"><h3>Custom builds</h3><p>Tell us the spec and we design to it.</p></div></div></section></main>`;
+  const html = `<!doctype html><html class="no-js"><head><title>Acme</title></head><body class="home no-sidebar modal-open elementor-popup">${body}</body></html>`;
+  const p = await extractProfile('store.example', { fetcher: site({ 'https://store.example/': html }) });
+  assert.equal(p.sections.length, 1);
+  assert.equal(p.sections[0].kind, 'cards');
+});
