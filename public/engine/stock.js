@@ -2,6 +2,8 @@
 // these fill only the gaps. Files live in /stock (about 150 KB each, progressive JPEG), photos from Pexels (see stock/LICENSE.txt).
 const COUNT = { dentists: 10, doctors: 8, electronics: 15, recycling: 8, process: 7, chemicals: 6 };
 const POOLS = { 'realestate-res': 12, 'realestate-com': 9, 'realestate-land': 4 };
+// process-6 (refinery) and process-7 (welding) suit chemicals and metal work, not recycling lines
+const PROC = { recycling: [3, 4, 5, 1, 2], chemicals: [1, 2, 3, 4, 5, 6, 7] };
 const REAL = { residential: ['res'], luxury: ['res'], commercial: ['com'], plots: ['land', 'res'], mixed: ['res', 'com'] };
 // which pools an industry draws from, first pool first (the first photos, used for heroes, come from it)
 const MULTI = (industry, segment) => {
@@ -22,7 +24,7 @@ export function stockPhotos(industry, seed = '', base = '/stock/', segment = '')
     const names = []; for (const g of REAL[segment] || ['res', 'com']) for (let k = 1; k <= POOLS['realestate-' + g]; k++) names.push(`realestate-${g}-${k}`);
     entries = shuffled(names, industry + segment + seed);
   } else {
-    for (const pool of MULTI(industry, segment)) { if (!COUNT[pool]) continue; entries.push(...shuffled(Array.from({ length: COUNT[pool] }, (_, i) => `${pool}-${i + 1}`), pool + seed)); }
+    for (const pool of MULTI(industry, segment)) { if (!COUNT[pool]) continue; const idx = pool === 'process' && PROC[industry] ? PROC[industry] : Array.from({ length: COUNT[pool] }, (_, i) => i + 1); entries.push(...shuffled(idx.map(i => `${pool}-${i}`), pool + seed)); }
   }
   return entries.map(e => ({ src: `${b}${e}-l.jpg`, small: `${b}${e}-s.jpg`, isStock: true }));
 }

@@ -6,6 +6,7 @@ import { esc, safeUrl, shell, tones, mix, logoMark, socialLinks, designerCard, n
 import { noDash, brief } from './copy.js';
 import { estateCopy, estateHeadline, AGENCY_STEPS } from './estate-copy.js';
 import { stockPhotos, goodPhoto } from './stock.js';
+import { FX } from './fx.js';
 
 const GF = 'https://fonts.googleapis.com/css2?family=';
 const S = (a, b = {}) => ({ ...a, ...b });
@@ -131,30 +132,6 @@ ${v.header === 'wp' ? `.mn a{border-radius:0;text-transform:uppercase;font-size:
 @media(max-width:620px){.cform{grid-template-columns:1fr}.ft .cols{grid-template-columns:1fr;padding:44px 0 28px}.top .l .loc{display:none}.band .w{flex-direction:column;align-items:flex-start}.hide-m{display:none}.strip .it{border-right:0;border-bottom:1px solid var(--line)}.cine .w{padding-bottom:70px}}
 `;
 };
-
-/** Motion and widgets shared by the creative variants. Respects reduced motion, skips touch devices for pointer effects. */
-const FX = `
-(function(){var d=document,reduce=matchMedia('(prefers-reduced-motion: reduce)').matches,fine=matchMedia('(hover: hover) and (pointer: fine)').matches;
-var $=function(s,r){return (r||d).querySelector(s)},$$=function(s,r){return [].slice.call((r||d).querySelectorAll(s))};
-/* parallax: only what is on screen moves, transforms only, off on small screens */
-var par=$$('[data-parallax]');if(par.length&&!reduce){var io=new IntersectionObserver(function(es){es.forEach(function(e){e.target._v=e.isIntersecting})},{rootMargin:'120px'});par.forEach(function(e){io.observe(e)});var tk=false,run=function(){tk=false;if(innerWidth<800)return;par.forEach(function(e){if(!e._v)return;var r=e.parentNode.getBoundingClientRect();if(!r.height)return;var dd=r.top+r.height/2-innerHeight/2;e.style.transform='translate3d(0,'+(-dd*(+e.dataset.parallax||.2)).toFixed(1)+'px,0) scale(1.12)'})};addEventListener('scroll',function(){if(!tk){tk=true;requestAnimationFrame(run)}},{passive:true});run()}
-/* drag scroller */
-$$('[data-drag]').forEach(function(s){var down=false,x0=0,l0=0,moved=0;s.addEventListener('pointerdown',function(e){if(e.pointerType!=='mouse')return;down=true;moved=0;x0=e.clientX;l0=s.scrollLeft;s.classList.add('drag')});addEventListener('pointermove',function(e){if(!down)return;var dx=e.clientX-x0;moved=Math.max(moved,Math.abs(dx));s.scrollLeft=l0-dx});addEventListener('pointerup',function(){if(!down)return;down=false;s.classList.remove('drag')});s.addEventListener('click',function(e){if(moved>6){e.preventDefault();e.stopPropagation()}},true)});
-/* tilt, magnet, cursor label */
-if(fine&&!reduce){$$('[data-tilt]').forEach(function(c){c.addEventListener('pointermove',function(e){var r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;c.style.transform='perspective(900px) rotateX('+(-y*5).toFixed(2)+'deg) rotateY('+(x*6).toFixed(2)+'deg) translateY(-4px)'});c.addEventListener('pointerleave',function(){c.style.transform=''})});
-$$('[data-magnet]').forEach(function(b){b.addEventListener('pointermove',function(e){var r=b.getBoundingClientRect();b.style.transform='translate('+((e.clientX-r.left-r.width/2)*.18).toFixed(1)+'px,'+((e.clientY-r.top-r.height/2)*.28).toFixed(1)+'px)'});b.addEventListener('pointerleave',function(){b.style.transform=''})});
-var cur=d.createElement('div');cur.className='efx-cur';d.body.appendChild(cur);var cx=0,cy=0,ct=false;addEventListener('pointermove',function(e){cx=e.clientX;cy=e.clientY;if(!ct){ct=true;requestAnimationFrame(function(){ct=false;cur.style.transform='translate3d('+(cx+16)+'px,'+(cy+16)+'px,0)'})}},{passive:true});$$('[data-cursor]').forEach(function(a){a.addEventListener('pointerenter',function(){cur.textContent=a.getAttribute('data-cursor');cur.classList.add('on')});a.addEventListener('pointerleave',function(){cur.classList.remove('on')})})}
-/* tabs */
-$$('[data-tabs]').forEach(function(t){var bs=$$('[data-tab]',t),ps=$$('[data-panel]',t);bs.forEach(function(b){b.addEventListener('click',function(){bs.forEach(function(x){x.classList.toggle('on',x===b)});ps.forEach(function(p){p.classList.toggle('on',p.getAttribute('data-panel')===b.getAttribute('data-tab'))})})})});
-/* live filter */
-var st={status:'',config:'',loc:'',type:''};function applyF(){$$('[data-pc]').forEach(function(c){var ok=(!st.type||(c.dataset.text||'').indexOf(st.type)>-1)&&(!st.status||c.dataset.status===st.status)&&(!st.config||(c.dataset.config||'').indexOf(st.config)>-1)&&(!st.loc||(c.dataset.loc||'').indexOf(st.loc)>-1);c.hidden=!ok});var n=$$('[data-pc]').filter(function(c){return !c.hidden}).length,e=$('[data-empty]');if(e)e.hidden=n>0;$$('[data-f]').forEach(function(b){var k=b.dataset.k;b.classList.toggle('on',(st[k]||'')===(b.dataset.f||''))})}
-$$('[data-f]').forEach(function(b){b.addEventListener('click',function(){st[b.dataset.k]=b.dataset.f;applyF()})});
-$$('[data-search]').forEach(function(f){f.addEventListener('submit',function(e){e.preventDefault();var v=function(n){var x=f.elements[n];return x?x.value:''};st.status='';st.config=v('config');st.loc=v('loc');st.type=v('type');applyF();var a=$('a[data-go="projects"]');if(a)a.click()})});
-$$('[data-ptype]').forEach(function(b){b.addEventListener('click',function(){var f=b.closest('form'),s=f&&f.elements.type;if(s)s.value=b.dataset.ptype;$$('[data-ptype]',f).forEach(function(x){x.classList.toggle('on',x===b)})})});
-/* calculators: your numbers in, an indicative figure out */
-$$('[data-emi]').forEach(function(w){var o=$('[data-out]',w),calc=function(){var P=+$('[name=amt]',w).value,r=+$('[name=rate]',w).value/1200,n=+$('[name=yrs]',w).value*12;if(!(P>0&&r>0&&n>0)){o.textContent='Enter your numbers';return}var m=P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);o.textContent=new Intl.NumberFormat('en-IN',{maximumFractionDigits:0}).format(Math.round(m))};$$('input',w).forEach(function(i){i.addEventListener('input',calc)});calc()});
-$$('[data-area]').forEach(function(w){var o=$('[data-out]',w),calc=function(){var a=+$('[name=people]',w).value,b=+$('[name=per]',w).value;o.textContent=a>0&&b>0?new Intl.NumberFormat('en-IN').format(Math.round(a*b))+' sq ft':'Enter your numbers'};$$('input',w).forEach(function(i){i.addEventListener('input',calc)});calc()});
-})();`;
 
 export function renderEstate(vi, profile, opts = {}) {
   const v = ESTATE_VARIANTS[vi % ESTATE_VARIANTS.length]; const m = model(profile, { fallbackBrand: v.fallback, ...opts }, v); const c = m.c, nav = c.nav, dz = m.designer, seg = c.seg;

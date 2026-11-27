@@ -6,6 +6,8 @@ import { renderKinetic } from './t5-kinetic.js';
 import { CLASSIC_VARIANTS, renderClassic } from './t6-classic.js';
 import { CLINIC_VARIANTS, renderClinic } from './t7-clinic.js';
 import { ESTATE_VARIANTS, renderEstate } from './t8-estate.js';
+import { CLINIC2_VARIANTS, renderClinic2 } from './t10-clinic2.js';
+import { INDUSTRIAL_VARIANTS, renderIndustrial } from './t9-industrial.js';
 import { INDUSTRIES, detectIndustry, industryName, SEGMENTS, ROLES } from './industry.js';
 
 const E = ['electronics'], H = ['dentists', 'doctors'];
@@ -30,10 +32,23 @@ const CLINIC_SEG = {
 const classic = CLASSIC_VARIANTS.map((v, i) => ({ id: v.id, segments: CLASSIC_SEG[v.id], industries: E, family: 'classic', defaultTheme: 'light', lightOnly: true, name: v.name, tagline: v.tagline, best: v.best, render: (p, o) => renderClassic(i, p, { photoSeed: v.id, ...o }) }));
 const clinic = CLINIC_VARIANTS.map((v, i) => ({ id: v.id, segments: CLINIC_SEG[v.id], industries: H, family: v.family, defaultTheme: 'light', lightOnly: true, name: v.name, tagline: v.tagline, best: v.best, render: (p, o) => renderClinic(i, p, { photoSeed: v.id, ...o }) }));
 
+const CLINIC2_SEG = {
+  'clinic-kids': { kids: 4, general: 2, clinic: 1.5, cosmetic: 0.8, ortho: 1.2, solo: 0.8, wellness: 0.6, hospital: 0.4, implants: 0.4 },
+  'clinic-luxe': { cosmetic: 4, implants: 3, solo: 2, ortho: 1.2, wellness: 1.2, clinic: 0.8, general: 0.6, kids: 0.2, hospital: 0.3 },
+  'clinic-compass': { hospital: 4, clinic: 2.5, general: 1.2, ortho: 0.8, implants: 0.8, solo: 0.4, wellness: 0.4, cosmetic: 0.3, kids: 0.6 },
+  'clinic-mono': { solo: 3, implants: 2, ortho: 2, cosmetic: 1.5, clinic: 1, general: 1, hospital: 0.5, wellness: 1, kids: 0.3 },
+  'clinic-calm': { wellness: 4, cosmetic: 2, solo: 1.5, general: 1.2, clinic: 1, kids: 1, ortho: 0.5, implants: 0.4, hospital: 0.3 },
+  'clinic-glass': { implants: 3.5, ortho: 3, hospital: 1.5, cosmetic: 1.5, clinic: 1.2, general: 1, solo: 1, kids: 0.3, wellness: 0.3 },
+  'clinic-wphealth': { clinic: 2.5, general: 2.5, hospital: 1.5, solo: 1.2, kids: 1.2, ortho: 1.2, implants: 1, cosmetic: 1, wellness: 1 }
+};
+const clinic2 = CLINIC2_VARIANTS.map((v, i) => ({ id: v.id, segments: CLINIC2_SEG[v.id], industries: H, family: v.family, defaultTheme: v.theme, lightOnly: true, name: v.name, tagline: v.tagline, best: v.best, render: (p, o) => renderClinic2(i, p, { photoSeed: v.id, ...o }) }));
+
 const estate = ESTATE_VARIANTS.map((v, i) => ({ id: v.id, industries: ['realestate'], family: v.family, defaultTheme: v.theme, lightOnly: true, name: v.name, tagline: v.tagline, best: v.best, segments: v.segments, roles: v.roles, render: (p, o) => renderEstate(i, p, { photoSeed: v.id, ...o }) }));
 
+const industrial = INDUSTRIAL_VARIANTS.map((v, i) => ({ id: v.id, industries: v.industries, family: v.family, defaultTheme: v.theme, lightOnly: true, name: v.name, tagline: v.tagline, best: v.best, segments: v.segments, render: (p, o) => renderIndustrial(i, p, { photoSeed: v.id, ...o }) }));
+
 /** Every design the generator knows. Add a template here and it joins the pool for its industries. */
-export const LIBRARY = [...modern, ...classic, ...clinic, ...estate];
+export const LIBRARY = [...modern, ...classic, ...clinic, ...clinic2, ...estate, ...industrial];
 export const getTemplate = id => LIBRARY.find(t => t.id === id);
 export { INDUSTRIES, detectIndustry, industryName, SEGMENTS, ROLES };
 

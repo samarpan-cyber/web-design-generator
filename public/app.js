@@ -9,6 +9,8 @@ const store = { get: k => { try { return localStorage.getItem(k); } catch { retu
 const ICONS = {
   electronics: '<path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="10" y="10" width="4" height="4"/>',
   manufacturing: '<path d="M3 21V10l6 3V10l6 3V6h6v15z"/>',
+  recycling: '<path d="M7 17l-3-5 3-5M7 7l4-4 3 5M17 7l3 5-3 5M17 17l-4 4-3-5"/>',
+  chemicals: '<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/>',
   healthcare: '<path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z"/>',
   dentists: '<path d="M12 3c-2 0-3 1-5 1S4 6 4 9c0 3 1 4 1.5 7S7 21 8.5 21 10 17 12 17s1.5 4 3.5 4 1.5-2.5 2-5S20 12 20 9c0-3-2-5-3-5s-3-1-5-1z"/>',
   doctors: '<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>',
@@ -18,6 +20,8 @@ const ICONS = {
 };
 const INDUSTRIES = [
   { id: 'electronics', name: 'Electronics and hardware', blurb: 'Component makers, EMS, power, IoT, test gear and distributors.', ready: true },
+  { id: 'recycling', name: 'Plastic recycling', blurb: 'Recyclers, regranulators and recycling machinery makers.', ready: true },
+  { id: 'chemicals', name: 'Chemicals', blurb: 'Industrial, specialty, metal treatment and water treatment chemical makers.', ready: true },
   { id: 'manufacturing', name: 'Manufacturing', blurb: 'Plants, fabricators and industrial suppliers.' },
   { id: 'realestate', name: 'Real estate', blurb: 'Developers, builders, brokers and agencies. Residential, commercial, plots.', ready: true },
   { id: 'dentists', name: 'Dentists', blurb: 'Dental clinics and specialists. Booking first, calm and clear.', ready: true },

@@ -29,7 +29,7 @@ const ico = (n, c = '') => `<svg class="ico ${c}" viewBox="0 0 24 24" fill="none
 const SVC_ICONS = ['tooth', 'heart', 'shield', 'smile', 'plus', 'user'];
 const svcIcon = (m, i) => (m.industry === 'dentists' ? ['tooth', 'smile', 'shield', 'plus', 'tooth', 'heart'] : ['heart', 'plus', 'shield', 'user', 'cal', 'smile'])[i % 6] || SVC_ICONS[i % 6];
 
-function model(profile, opts, v) {
+export function clinicModel(profile, opts, v) {
   const c = clinicCopy(); const p = profile || {}; const ck = p.clinic || {};
   const industry = p.industry === 'dentists' ? 'dentists' : 'doctors'; const spec = (p.industryInfo && p.industryInfo.specialty) || 'general';
   const clean = s => noDash(String(s || '').replace(/\s+/g, ' ').trim());
@@ -127,7 +127,7 @@ ${v.serv === 'bento' ? `.s-bento .sv{padding:24px}.s-bento .sv:nth-child(1){back
 function phBox(m, cls, img) { return `<div class="ph ${cls}">${img ? `<img src="${esc(img)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ico(m.industry === 'dentists' ? 'tooth' : 'cross')}</div>`; }
 
 export function renderClinic(vi, profile, opts = {}) {
-  const v = CLINIC_VARIANTS[vi % CLINIC_VARIANTS.length]; const m = model(profile, { fallbackBrand: v.fallback, ...opts }, v); const c = m.c, nav = c.nav, dz = m.designer;
+  const v = CLINIC_VARIANTS[vi % CLINIC_VARIANTS.length]; const m = clinicModel(profile, { fallbackBrand: v.fallback, ...opts }, v); const c = m.c, nav = c.nav, dz = m.designer;
   const PAGES = [['home', nav.home], ['about', nav.about], ['treatments', nav.treatments], ['patients', nav.patients], ['book', nav.book]];
   const hero = m.gallery[0] || ''; const tel = m.phone ? m.phone.replace(/[^+\d]/g, '') : '';
   const head = (k, h, s, center) => `<div class="hd${center ? ' c' : ''}" data-reveal><span class="k">${esc(k)}</span><h2 class="h2 hs-t">${esc(h)}</h2>${s ? `<p class="sub">${esc(s)}</p>` : ''}</div>`;
