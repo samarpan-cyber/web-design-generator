@@ -1,4 +1,4 @@
-# Design Generator V4.2
+# Design Generator V7
 
 Log in, pick an industry, paste a company website, and get **five distinct, mobile-ready, five-page redesign concepts** built from that company's real content. Share them with the client through a private link that stops working after 48 hours.
 
@@ -6,7 +6,14 @@ Log in, pick an industry, paste a company website, and get **five distinct, mobi
 login → industry → website or lead → /api/analyze reads the live site → profile → 5 designs → share link
 ```
 
-## What V4.2 adds
+## What V7 adds
+
+- **Real estate.** A fourth industry with eight designs: six creative (Skyline, Atelier, Homestead, Listings, Terra, Workplace) with parallax, slow zoom, drag galleries, tilt cards, magnetic buttons, live filters and calculators, plus two plain WordPress/Elementor style (Property Search, Developer Classic). Research notes: `docs/RESEARCH-REAL-ESTATE.md`.
+- **Kind of business, not just industry.** Every industry now has segments and the generator suggests designs that fit: real estate (residential, luxury, commercial, plots, mixed; developer or agency), electronics (manufacturer, distributor, product brand), doctors (clinic, individual, hospital, wellness) and dentists (general, cosmetic, braces, implants, kids). It is detected from the website, Google Business text, LinkedIn text, notes and sheets, shown with the reasons, and changed with the **Focus** selects above the designs.
+- **Real estate facts from the site.** Projects with location, sizes, area, price and status, RERA numbers, locations and amenities are read from the page or from a project sheet. Nothing is invented: without projects, designs show property types instead.
+- **Stock photos for real estate** (residential, commercial, land) when the site has few or small photos, captioned "Illustrative image".
+
+## What V4.2 added
 
 - **Stock photos when a site has none.** Clinics rarely have good photos beyond a logo. When the prospect's own site has few or small photos, designs fill the gaps with fast, high resolution stock photos from `public/stock` (about 130 KB each, Pexels licence, see `public/stock/LICENSE.txt`). The prospect's own logo and photos always come first, small images and logos are never stretched across a hero, and every design in a set gets different photos. Electronics designs use the same fallback instead of generated artwork. Stock photos are never shown as the prospect's doctors, staff or products.
 - **No more stuck "reading the site".** One clock now covers the whole read (24 seconds): a slow page, a redirect chain, a hung server or a DNS lookup that never answers all stop on it, and the page shows a clear message after 55 seconds at most.
