@@ -1,4 +1,4 @@
-# Design Generator V4.1
+# Design Generator V4.2
 
 Log in, pick an industry, paste a company website, and get **five distinct, mobile-ready, five-page redesign concepts** built from that company's real content. Share them with the client through a private link that stops working after 48 hours.
 
@@ -6,7 +6,12 @@ Log in, pick an industry, paste a company website, and get **five distinct, mobi
 login → industry → website or lead → /api/analyze reads the live site → profile → 5 designs → share link
 ```
 
-## What V4.1 adds
+## What V4.2 adds
+
+- **Stock photos when a site has none.** Clinics rarely have good photos beyond a logo. When the prospect's own site has few or small photos, designs fill the gaps with fast, high resolution stock photos from `public/stock` (about 130 KB each, Pexels licence, see `public/stock/LICENSE.txt`). The prospect's own logo and photos always come first, small images and logos are never stretched across a hero, and every design in a set gets different photos. Electronics designs use the same fallback instead of generated artwork. Stock photos are never shown as the prospect's doctors, staff or products.
+- **No more stuck "reading the site".** One clock now covers the whole read (24 seconds): a slow page, a redirect chain, a hung server or a DNS lookup that never answers all stop on it, and the page shows a clear message after 55 seconds at most.
+
+## What V4.1 added
 
 - **Doctors and Dentists.** Two new industries on the home page, with eight clinic designs (four creative, four plain WordPress/Elementor style). Built from research into top clinic sites: booking above the fold, hours and location, named doctors with credentials, reviews, calm colours, one consistent treatment layout and an FAQ. Doctor names, hours, ratings and reviews are shown only when the site or your details contain them.
 - **Smart industry detection.** `public/engine/industry.js` works out the industry from the website, Google Business category, LinkedIn headline, notes, lead industry and title. The result and the reasons are shown, and you can switch back. **Add data** takes a LinkedIn link, a Google Maps link, pasted Google Business text, notes and files, and **No website? Start from details** builds a set from those alone.

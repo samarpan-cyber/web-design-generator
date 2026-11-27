@@ -9,14 +9,14 @@ import { INDUSTRIES, detectIndustry, industryName } from './industry.js';
 
 const E = ['electronics'], H = ['dentists', 'doctors'];
 const modern = [
-  { id: 'noir', industries: E, family: 'modern', defaultTheme: 'dark', name: 'Circuit Noir', tagline: 'Dark tech. Live circuit canvas. Ctrl K search.', best: 'Chips, power and embedded', render: renderNoir },
-  { id: 'bento', industries: E, family: 'modern', defaultTheme: 'light', name: 'Bento Lab', tagline: 'Warm, editorial, serif. Bento tiles and masonry.', best: 'Friendly B2B and distributors', render: renderBento },
-  { id: 'blueprint', industries: E, family: 'modern', defaultTheme: 'dark', name: 'Blueprint', tagline: 'Engineering sheet. Table catalogue and RFQ form.', best: 'Test gear and custom engineering', render: renderBlueprint },
-  { id: 'aurora', industries: E, family: 'modern', defaultTheme: 'dark', name: 'Aurora Glass', tagline: 'Soft futurism. Bottom dock and pinned story.', best: 'IoT, wireless and modern brands', render: renderAurora },
-  { id: 'kinetic', industries: E, family: 'modern', defaultTheme: 'light', name: 'Kinetic', tagline: 'Loud editorial type. Full-screen menu.', best: 'Bold brands that want attention', render: renderKinetic }
+  { id: 'noir', industries: E, family: 'modern', defaultTheme: 'dark', name: 'Circuit Noir', tagline: 'Dark tech. Live circuit canvas. Ctrl K search.', best: 'Chips, power and embedded', render: (p, o) => renderNoir(p, { photoSeed: 'noir', ...o }) },
+  { id: 'bento', industries: E, family: 'modern', defaultTheme: 'light', name: 'Bento Lab', tagline: 'Warm, editorial, serif. Bento tiles and masonry.', best: 'Friendly B2B and distributors', render: (p, o) => renderBento(p, { photoSeed: 'bento', ...o }) },
+  { id: 'blueprint', industries: E, family: 'modern', defaultTheme: 'dark', name: 'Blueprint', tagline: 'Engineering sheet. Table catalogue and RFQ form.', best: 'Test gear and custom engineering', render: (p, o) => renderBlueprint(p, { photoSeed: 'blueprint', ...o }) },
+  { id: 'aurora', industries: E, family: 'modern', defaultTheme: 'dark', name: 'Aurora Glass', tagline: 'Soft futurism. Bottom dock and pinned story.', best: 'IoT, wireless and modern brands', render: (p, o) => renderAurora(p, { photoSeed: 'aurora', ...o }) },
+  { id: 'kinetic', industries: E, family: 'modern', defaultTheme: 'light', name: 'Kinetic', tagline: 'Loud editorial type. Full-screen menu.', best: 'Bold brands that want attention', render: (p, o) => renderKinetic(p, { photoSeed: 'kinetic', ...o }) }
 ];
-const classic = CLASSIC_VARIANTS.map((v, i) => ({ id: v.id, industries: E, family: 'classic', defaultTheme: 'light', lightOnly: true, name: v.name, tagline: v.tagline, best: v.best, render: (p, o) => renderClassic(i, p, o) }));
-const clinic = CLINIC_VARIANTS.map((v, i) => ({ id: v.id, industries: H, family: v.family, defaultTheme: 'light', lightOnly: true, name: v.name, tagline: v.tagline, best: v.best, render: (p, o) => renderClinic(i, p, o) }));
+const classic = CLASSIC_VARIANTS.map((v, i) => ({ id: v.id, industries: E, family: 'classic', defaultTheme: 'light', lightOnly: true, name: v.name, tagline: v.tagline, best: v.best, render: (p, o) => renderClassic(i, p, { photoSeed: v.id, ...o }) }));
+const clinic = CLINIC_VARIANTS.map((v, i) => ({ id: v.id, industries: H, family: v.family, defaultTheme: 'light', lightOnly: true, name: v.name, tagline: v.tagline, best: v.best, render: (p, o) => renderClinic(i, p, { photoSeed: v.id, ...o }) }));
 
 /** Every design the generator knows. Add a template here and it joins the pool for its industries. */
 export const LIBRARY = [...modern, ...classic, ...clinic];

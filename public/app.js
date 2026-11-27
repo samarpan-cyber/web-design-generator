@@ -120,8 +120,13 @@ function resolveInput(text) {
 
 /* ---------------- generation ---------------- */
 async function api(path, body) {
-  const r = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
-  return { status: r.status, ...(await r.json().catch(() => ({}))) };
+  const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 55000); // never wait forever on a slow site
+  try {
+    const r = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal });
+    return { status: r.status, ...(await r.json().catch(() => ({}))) };
+  } catch (e) {
+    return { status: 0, error: e && e.name === 'AbortError' ? 'That site is taking too long to answer' : 'Could not reach the generator service' };
+  } finally { clearTimeout(timer); }
 }
 function showSkeletons() {
   $('#welcome').hidden = true; $('#results').hidden = false; $('#resTitle').textContent = 'Designing'; $('#resMeta').textContent = 'Reading the site and building five concepts.';

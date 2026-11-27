@@ -139,3 +139,16 @@ test('reads sections on sites that use h1 or h3 for section headings and wrap th
   assert.equal(p.sections[0].heading, 'What we do');
   assert.equal(p.sections[0].items.length, 3);
 });
+
+test('a site that never answers cannot hang the read: the whole thing stops on the clock', async () => {
+  const hang = () => new Promise(() => {});
+  const t0 = Date.now();
+  await assert.rejects(() => extractProfile('hung.example', { fetcher: hang, totalMs: 1200 }), /too long|time/i);
+  assert.ok(Date.now() - t0 < 3500, 'stopped in ' + (Date.now() - t0));
+});
+test('a site whose first page works but everything else hangs still finishes in time', async () => {
+  const page = '<html><head><title>Slow Co</title><link rel="stylesheet" href="/a.css"></head><body><h1>Slow Co</h1><a href="/products">Products</a><p>We make things for people who need them done well.</p></body></html>';
+  const f = (u) => (/\.css|products/.test(u) ? new Promise(() => {}) : Promise.resolve({ text: page, url: 'https://slow.example/' }));
+  const t0 = Date.now(); const p = await extractProfile('slow.example', { fetcher: f, totalMs: 2500, budgetMs: 1500 });
+  assert.equal(p.name, 'Slow Co'); assert.ok(Date.now() - t0 < 6500, 'finished in ' + (Date.now() - t0));
+});
