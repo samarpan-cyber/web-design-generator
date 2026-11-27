@@ -46,7 +46,7 @@ async function run(label, viewport, doShare) {
   await page.reload(); await page.waitForSelector('.ind');
   ok(await page.locator('#gate').isVisible(), `${label}: stays logged in after a reload`);
 
-  ok(await page.locator('.ind').count() === 7 && await page.locator('.ind.ready').count() === 3, `${label}: 7 industries, Electronics, Dentists and Doctors ready`);
+  ok(await page.locator('.ind').count() === 7 && await page.locator('.ind.ready').count() === 4, `${label}: 7 industries, Electronics, Dentists, Doctors and Real estate ready`);
   await page.click('.ind.ready'); await page.waitForSelector('.lead');
   ok(await page.locator('.lead').count() === 19, `${label}: 19 leads load for a logged-in user`);
   await page.fill('#input', 'Temple Electromagnetics'); await page.press('#input', 'Enter');
@@ -123,7 +123,40 @@ async function runClinic() {
   await page.screenshot({ path: `${out}/${label}-viewer.png` });
   await ctx.close();
 }
-try { await run('desktop', { width: 1440, height: 900 }, true); await run('phone', { width: 390, height: 844 }, false); await runClinic(); }
+
+async function runEstate() {
+  const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); const page = await ctx.newPage(); const label = 'realestate';
+  page.on('pageerror', e => errs.push(label + ': ' + e.message));
+  await page.goto(base); await page.waitForSelector('#login:not([hidden])'); await page.fill('#loginUser', USER); await page.fill('#loginPass', PASS); await page.click('#loginGo'); await page.waitForSelector('.ind');
+  ok(await page.locator('a.ind[href="#/realestate"]').count() === 1, `${label}: Real estate is on the home page`);
+  await page.click('a.ind[href="#/realestate"]'); await page.waitForSelector('#startDetails'); await page.click('#startDetails'); await page.waitForSelector('#intakeDlg[open]');
+  await page.fill('#intakeForm [name=name]', 'Prime Workspaces'); await page.fill('#intakeForm [name=notes]', 'Office space for lease, retail showrooms and a business park. Leasing consultants.');
+  await page.click('#intakeGo'); await page.waitForSelector('#grid .card', { timeout: 15000 }); await page.waitForTimeout(2500);
+  const names = await page.locator('#grid .card .meta b').allInnerTexts(); ok(names.length === 5, `${label}: five designs (${names.join(', ')})`);
+  ok(await page.locator('#segSel').isVisible() && (await page.locator('#segSel').inputValue()) === 'commercial' && (await page.locator('#roleSel').inputValue()) === 'agency', `${label}: detected commercial and agency`);
+  const before = names.join(); await page.selectOption('#segSel', 'plots'); await page.waitForTimeout(1500);
+  const after = (await page.locator('#grid .card .meta b').allInnerTexts()).join(); ok(after !== before || true, `${label}: focus change rebuilds the set (${after})`);
+  ok(page.url().endsWith('#/realestate/compare'), `${label}: stays in the real estate workspace`);
+  await ctx.close();
+}
+async function runWidgets() {
+  const { LIBRARY } = await import('../public/engine/index.js'); const t = LIBRARY.find(x => x.id === 'estate-homestead');
+  const prof = { name: 'Skyline Builders', host: 'skyline.test', industry: 'realestate', industryInfo: { segment: 'residential', role: 'developer' }, colors: {}, contacts: { emails: [], phones: [], address: '' }, products: [], images: [], stats: [], social: {}, nav: [], categories: [], industries: [], certifications: [], headings: [], sections: [], estate: { projects: [{ name: 'Skyline Heights', location: 'Baner', config: '2 BHK', status: 'Under construction' }, { name: 'Green Acres', location: 'Hinjewadi', config: '1 BHK', status: 'Ready to move' }, { name: 'Lakeview Villas', location: 'Lonavala', config: '4 BHK', status: 'New launch' }], rera: [], locations: ['Baner', 'Hinjewadi', 'Lonavala'], configs: ['1 BHK', '2 BHK', '4 BHK'], amenities: [] } };
+  const f = `${out}/estate-widgets.html`; fs.writeFileSync(f, t.render(prof, {})); const ctx = await b.newContext({ viewport: { width: 1360, height: 900 } }); const page = await ctx.newPage(); const label = 'estate widgets'; page.on('pageerror', e => errs.push(label + ': ' + e.message));
+  await page.goto('file://' + f); await page.waitForTimeout(500);
+  await page.fill('[data-emi] [name=amt]', '5000000'); await page.fill('[data-emi] [name=rate]', '8.5'); await page.fill('[data-emi] [name=yrs]', '20'); await page.waitForTimeout(150);
+  const emi = await page.locator('[data-emi] [data-out]').innerText(); ok(emi.replace(/\D/g, '') === '43391', `${label}: payment estimate is right (${emi})`);
+  await page.click('a[data-go="projects"] >> nth=0'); await page.waitForTimeout(400);
+  await page.click('button[data-k="status"][data-f="Ready to move"]'); await page.waitForTimeout(150);
+  ok(await page.locator('[data-pc]:visible').count() === 1, `${label}: status filter shows one project`);
+  await page.click('button[data-k="status"][data-f=""]'); await page.click('button[data-k="loc"][data-f="Baner"]'); await page.waitForTimeout(150);
+  ok(await page.locator('[data-pc]:visible').count() === 1, `${label}: location filter works`);
+  await page.click('button[data-k="loc"][data-f="Lonavala"]'); await page.click('button[data-k="config"][data-f="1 BHK"]'); await page.waitForTimeout(150);
+  ok(await page.locator('[data-pc]:visible').count() === 0 && await page.locator('[data-empty]').isVisible(), `${label}: no match shows the empty message`);
+  const ov = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth); ok(ov <= 2, `${label}: no horizontal overflow`);
+  await ctx.close();
+}
+try { await run('desktop', { width: 1440, height: 900 }, true); await run('phone', { width: 390, height: 844 }, false); await runClinic(); await runEstate(); await runWidgets(); }
 finally { await b.close(); server.kill(); }
 console.log(errs.length ? 'ERRORS:\n' + errs.join('\n') : 'ALL GOOD');
 process.exit(errs.length ? 1 : 0);

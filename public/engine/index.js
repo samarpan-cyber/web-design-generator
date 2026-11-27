@@ -6,7 +6,7 @@ import { renderKinetic } from './t5-kinetic.js';
 import { CLASSIC_VARIANTS, renderClassic } from './t6-classic.js';
 import { CLINIC_VARIANTS, renderClinic } from './t7-clinic.js';
 import { ESTATE_VARIANTS, renderEstate } from './t8-estate.js';
-import { INDUSTRIES, detectIndustry, industryName } from './industry.js';
+import { INDUSTRIES, detectIndustry, industryName, SEGMENTS, ROLES } from './industry.js';
 
 const E = ['electronics'], H = ['dentists', 'doctors'];
 const modern = [
@@ -35,7 +35,7 @@ const estate = ESTATE_VARIANTS.map((v, i) => ({ id: v.id, industries: ['realesta
 /** Every design the generator knows. Add a template here and it joins the pool for its industries. */
 export const LIBRARY = [...modern, ...classic, ...clinic, ...estate];
 export const getTemplate = id => LIBRARY.find(t => t.id === id);
-export { INDUSTRIES, detectIndustry, industryName };
+export { INDUSTRIES, detectIndustry, industryName, SEGMENTS, ROLES };
 
 function rng(seed) { let s = (seed >>> 0) || 1; return () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296); }
 function hash(str) { let h = 2166136261; for (const ch of String(str)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return h >>> 0; }

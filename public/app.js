@@ -1,4 +1,4 @@
-import { TEMPLATES, pickSet, setSet } from './engine/index.js';
+import { TEMPLATES, pickSet, setSet, SEGMENTS, ROLES } from './engine/index.js';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
@@ -19,9 +19,9 @@ const ICONS = {
 const INDUSTRIES = [
   { id: 'electronics', name: 'Electronics and hardware', blurb: 'Component makers, EMS, power, IoT, test gear and distributors.', ready: true },
   { id: 'manufacturing', name: 'Manufacturing', blurb: 'Plants, fabricators and industrial suppliers.' },
+  { id: 'realestate', name: 'Real estate', blurb: 'Developers, builders, brokers and agencies. Residential, commercial, plots.', ready: true },
   { id: 'dentists', name: 'Dentists', blurb: 'Dental clinics and specialists. Booking first, calm and clear.', ready: true },
   { id: 'doctors', name: 'Doctors', blurb: 'Clinics, consultants and hospitals. Trust, hours and appointments.', ready: true },
-  { id: 'realestate', name: 'Real estate', blurb: 'Developers, brokers and property managers.' },
   { id: 'logistics', name: 'Logistics', blurb: 'Freight, warehousing and last-mile teams.' },
   { id: 'software', name: 'Software and IT', blurb: 'SaaS, agencies and IT services.' }
 ];
@@ -168,7 +168,8 @@ function suggestIndustry(p, input) {
   if (!got || got === cur) return;
   const to = INDUSTRIES.find(i => i.id === got && i.ready); if (!to) return;
   const why = (info.reasons || []).slice(0, 2).join(', ');
-  const el = say(`This site looks like <b>${esc(to.name)}</b>${why ? ` <span style="color:var(--muted)">(${esc(why)})</span>` : ''}, so I picked those designs. <div class="acts"><button class="ghost" data-act="keep">Keep these</button><button class="ghost" data-act="back">Use ${esc((state.industry || {}).name || 'my choice')} designs instead</button></div>`);
+  const kind = [info.segmentLabel, info.roleLabel].filter(Boolean).join(', ');
+  const el = say(`This site looks like <b>${esc(to.name)}</b>${kind ? ` (${esc(kind)})` : ''}${why ? ` <span style="color:var(--muted)">(${esc(why)})</span>` : ''}, so I picked those designs. <div class="acts"><button class="ghost" data-act="keep">Keep these</button><button class="ghost" data-act="back">Use ${esc((state.industry || {}).name || 'my choice')} designs instead</button></div>`);
   state.industry = to; $('#indName').textContent = to.name;
   $('[data-act=back]', el).onclick = () => { el.remove(); const keep = INDUSTRIES.find(i => i.id === cur); if (keep) { state.industry = keep; $('#indName').textContent = keep.name; } generate(input, { force: cur }); };
   $('[data-act=keep]', el).onclick = () => el.remove();
@@ -194,7 +195,7 @@ function post(frame, msg) { try { frame.contentWindow.postMessage(msg, '*'); } c
 function showResults(profile, keepRound) {
   if (!keepRound) state.round = 0;
   setSet(pickSet(profile, state.round || 0));
-  state.profile = profile; state.favs = new Set(); state.shareUrl = null; $('#shuffleBtn').disabled = false; $('#intakeBtn').disabled = false;
+  state.profile = profile; state.favs = new Set(); state.shareUrl = null; $('#shuffleBtn').disabled = false; $('#intakeBtn').disabled = false; fillFocus(profile);
   $('#welcome').hidden = true; $('#results').hidden = false; $('#editBtn').disabled = false; $('#pitchBtn').disabled = false; $('#dlAll').disabled = false; $('#resume').hidden = true; setStep(3);
   document.title = `${profile.name} | Design Generator`;
   $('#resTitle').textContent = profile.name; $('#resMeta').textContent = `${profile.host}. Five concepts, five pages each. Star your favourites, then copy the pitch note.`;
@@ -277,6 +278,20 @@ $('#editForm').addEventListener('submit', e => {
   p.contacts = { ...p.contacts, emails: f.email.value.trim() ? [f.email.value.trim()] : [], phones: f.phone.value.trim() ? [f.phone.value.trim()] : [] };
   state.agency = f.agency.value.trim(); store.set('wdg-agency', state.agency); showResults(p); toast('All five designs updated');
 });
+
+/* ---------------- focus: the kind of business inside the industry ---------------- */
+function fillFocus(p) {
+  const segs = SEGMENTS[p.industry] || [], roles = ROLES[p.industry] || [], info = p.industryInfo || {};
+  const seg = $('#segSel'), rol = $('#roleSel');
+  seg.hidden = !segs.length; rol.hidden = !roles.length;
+  seg.innerHTML = segs.map(([k, l]) => `<option value="${k}" ${k === info.segment ? 'selected' : ''}>${esc(l)}</option>`).join('');
+  rol.innerHTML = roles.map(([k, l]) => `<option value="${k}" ${k === info.role ? 'selected' : ''}>${esc(l)}</option>`).join('');
+}
+function changeFocus() {
+  const p = structuredClone(state.profile); p.industryInfo = { ...(p.industryInfo || {}), segment: $('#segSel').value, role: $('#roleSel').hidden ? (p.industryInfo || {}).role : $('#roleSel').value, forced: true };
+  state.round = 0; showResults(p, true); toast('New set for that kind of business');
+}
+$('#segSel').onchange = changeFocus; $('#roleSel').onchange = changeFocus;
 
 /* ---------------- shuffle and intake ---------------- */
 $('#shuffleBtn').onclick = () => { state.round = (state.round || 0) + 1; showResults(state.profile, true); toast('New set of five designs'); };

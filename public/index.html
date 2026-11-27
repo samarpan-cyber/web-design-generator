@@ -20,6 +20,7 @@
   <div class="top-actions" id="topActions" hidden>
     <a class="ghost" href="#/" id="changeInd">Change industry</a>
     <div class="seg" id="themeSeg" role="group" aria-label="Preview theme"><button data-t="auto" class="on">Auto</button><button data-t="dark">Dark</button><button data-t="light">Light</button></div>
+    <select id="segSel" class="ghost-sel" aria-label="Type of business" hidden></select><select id="roleSel" class="ghost-sel" aria-label="Developer or agency" hidden></select>
     <button class="ghost" id="shuffleBtn" disabled title="Build a different set of five from the design library">Shuffle set</button>
     <button class="ghost" id="intakeBtn" disabled title="Add a product sheet, sitemap, Google Business text or a screenshot">Add data</button>
     <button class="ghost" id="editBtn" disabled>Edit details</button>
@@ -104,7 +105,7 @@
 <dialog id="intakeDlg"><form method="dialog" class="edit" id="intakeForm">
   <h3>Add information</h3><p class="hint">For sites that cannot be read. Upload an Excel or CSV product list, a sitemap.xml, a Google Business export, or a screenshot of the site. Everything is combined with what was already found.</p>
   <label>Company name<input name="name"></label>
-  <div class="two"><label>Website address (optional)<input name="url" placeholder="company.com"></label><label>Industry<select name="industry"><option value="">Detect it for me</option><option value="electronics">Electronics</option><option value="dentists">Dentists</option><option value="doctors">Doctors</option></select></label></div>
+  <div class="two"><label>Website address (optional)<input name="url" placeholder="company.com"></label><label>Industry<select name="industry"><option value="">Detect it for me</option><option value="electronics">Electronics</option><option value="dentists">Dentists</option><option value="doctors">Doctors</option><option value="realestate">Real estate</option></select></label></div>
   <div class="two"><label>LinkedIn profile or company link (optional)<input name="linkedin" placeholder="linkedin.com/in/..."></label><label>Google Maps / Business link (optional)<input name="gmbUrl" placeholder="google.com/maps/place/..."></label></div>
   <label>Files<input name="files" type="file" multiple accept=".xlsx,.csv,.tsv,.txt,.xml,.json,.png,.jpg,.jpeg,.webp"></label>
   <label>Google Business details (paste)<textarea name="gmb" rows="3" placeholder="Name: ...&#10;Category: Dentist&#10;Phone: ...&#10;Address: ...&#10;Rating: 4.8 (312 reviews)"></textarea></label>
