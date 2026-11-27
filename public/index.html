@@ -68,6 +68,7 @@
       <p class="eyebrow">Step 2 of 4</p>
       <h2>Paste a website.<br><span>Get five better ones.</span></h2>
       <p class="sub">We read the live site, then rebuild it five different ways. Real products, real branding, five pages each, mobile ready.</p>
+      <p class="sub" style="margin-top:-6px"><button class="ghost" id="startDetails" type="button">No website? Start from details, a sheet or a screenshot</button></p>
       <div class="leads-head"><h3>Your leads</h3><input id="leadSearch" placeholder="Filter leads" aria-label="Filter leads"></div>
       <div class="leads" id="leads"></div>
     </div>
@@ -103,9 +104,11 @@
 <dialog id="intakeDlg"><form method="dialog" class="edit" id="intakeForm">
   <h3>Add information</h3><p class="hint">For sites that cannot be read. Upload an Excel or CSV product list, a sitemap.xml, a Google Business export, or a screenshot of the site. Everything is combined with what was already found.</p>
   <label>Company name<input name="name"></label>
-  <label>Website address (optional)<input name="url" placeholder="company.com"></label>
+  <div class="two"><label>Website address (optional)<input name="url" placeholder="company.com"></label><label>Industry<select name="industry"><option value="">Detect it for me</option><option value="electronics">Electronics</option><option value="dentists">Dentists</option><option value="doctors">Doctors</option></select></label></div>
+  <div class="two"><label>LinkedIn profile or company link (optional)<input name="linkedin" placeholder="linkedin.com/in/..."></label><label>Google Maps / Business link (optional)<input name="gmbUrl" placeholder="google.com/maps/place/..."></label></div>
   <label>Files<input name="files" type="file" multiple accept=".xlsx,.csv,.tsv,.txt,.xml,.json,.png,.jpg,.jpeg,.webp"></label>
-  <label>Google Business details or notes<textarea name="gmb" rows="4" placeholder="Name: ...&#10;Phone: ...&#10;Address: ...&#10;About: ..."></textarea></label>
+  <label>Google Business details (paste)<textarea name="gmb" rows="3" placeholder="Name: ...&#10;Category: Dentist&#10;Phone: ...&#10;Address: ...&#10;Rating: 4.8 (312 reviews)"></textarea></label>
+  <label>Notes (anything else you know, like a LinkedIn headline)<textarea name="notes" rows="2" placeholder="Orthodontist, 15 years, Pune"></textarea></label>
   <p id="intakeErr" class="login-msg" role="alert"></p>
   <div class="dlg-actions"><button value="cancel" class="ghost">Cancel</button><button value="ok" class="primary" id="intakeGo">Build designs</button></div>
 </form></dialog>

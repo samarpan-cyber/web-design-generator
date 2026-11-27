@@ -10,6 +10,8 @@ const ICONS = {
   electronics: '<path d="M9 3v3M15 3v3M9 18v3M15 18v3M3 9h3M3 15h3M18 9h3M18 15h3"/><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="10" y="10" width="4" height="4"/>',
   manufacturing: '<path d="M3 21V10l6 3V10l6 3V6h6v15z"/>',
   healthcare: '<path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z"/>',
+  dentists: '<path d="M12 3c-2 0-3 1-5 1S4 6 4 9c0 3 1 4 1.5 7S7 21 8.5 21 10 17 12 17s1.5 4 3.5 4 1.5-2.5 2-5S20 12 20 9c0-3-2-5-3-5s-3-1-5-1z"/>',
+  doctors: '<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>',
   realestate: '<path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/>',
   logistics: '<path d="M2 7h12v10H2zM14 10h4l4 3v4h-8"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',
   software: '<rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3M8 10l-2 2 2 2M16 10l2 2-2 2"/>'
@@ -17,7 +19,8 @@ const ICONS = {
 const INDUSTRIES = [
   { id: 'electronics', name: 'Electronics and hardware', blurb: 'Component makers, EMS, power, IoT, test gear and distributors.', ready: true },
   { id: 'manufacturing', name: 'Manufacturing', blurb: 'Plants, fabricators and industrial suppliers.' },
-  { id: 'healthcare', name: 'Healthcare', blurb: 'Clinics, labs and medical suppliers.' },
+  { id: 'dentists', name: 'Dentists', blurb: 'Dental clinics and specialists. Booking first, calm and clear.', ready: true },
+  { id: 'doctors', name: 'Doctors', blurb: 'Clinics, consultants and hospitals. Trust, hours and appointments.', ready: true },
   { id: 'realestate', name: 'Real estate', blurb: 'Developers, brokers and property managers.' },
   { id: 'logistics', name: 'Logistics', blurb: 'Freight, warehousing and last-mile teams.' },
   { id: 'software', name: 'Software and IT', blurb: 'SaaS, agencies and IT services.' }
@@ -124,7 +127,7 @@ function showSkeletons() {
   $('#welcome').hidden = true; $('#results').hidden = false; $('#resTitle').textContent = 'Designing'; $('#resMeta').textContent = 'Reading the site and building five concepts.';
   $('#grid').innerHTML = TEMPLATES.map(() => '<div class="skeleton"></div>').join(''); $('#pitchBtn').disabled = true; $('#dlAll').disabled = true;
 }
-async function generate(input) {
+async function generate(input, opts = {}) {
   if (state.busy) return;
   const t = input.trim();
   if (/^(dark|light|auto)( mode)?$/i.test(t)) { const v = t.split(' ')[0].toLowerCase(); say(esc(t), 'me'); setMode(v); say(`Previews switched to <b>${v}</b>.`); return; }
@@ -138,7 +141,7 @@ async function generate(input) {
   showSkeletons(); if (innerWidth < 980) $('#results').scrollIntoView({ behavior: 'smooth', block: 'start' });
   const lis = $$('li', bot); let i = 0;
   const ticker = setInterval(() => { if (i < lis.length - 1) lis[i++].classList.add('done'); }, 1000);
-  let res; try { res = await api('/api/analyze', { url: target.url, name: target.name }); } catch { res = { status: 0, error: 'Could not reach the generator service' }; }
+  let res; try { res = await api('/api/analyze', { url: target.url, name: target.name, industry: state.industry ? state.industry.id : '', force: opts.force || '' }); } catch { res = { status: 0, error: 'Could not reach the generator service' }; }
   clearInterval(ticker); state.busy = false; $('#go').disabled = false;
   if (res.status === 401) { bot.remove(); $('#results').hidden = true; $('#welcome').hidden = false; expired(); return; }
   if (!res.ok) {
@@ -148,12 +151,22 @@ async function generate(input) {
     $('#nameOnly', bot).onclick = () => fromNameOnly(target);
     if ($('#addData', bot)) $('#addData', bot).onclick = () => openIntake({ name: target.name, url: target.url }); return;
   }
-  lis.forEach(l => l.classList.add('done')); summarize(res.profile, bot); showResults(res.profile);
+  lis.forEach(l => l.classList.add('done')); summarize(res.profile, bot); showResults(res.profile); suggestIndustry(res.profile, input);
 }
 function fromNameOnly(target) {
   const url = /^https?:\/\//i.test(target.url) ? target.url : 'https://' + target.url; let host = ''; try { host = new URL(url).hostname.replace(/^www\./, ''); } catch { /* ignore */ }
-  const p = { url, host, name: target.name || host.split('.')[0], colors: {}, nav: [], categories: [], products: [], images: [], headings: [], stats: [], certifications: [], industries: [], contacts: { emails: [], phones: [], address: '' }, social: {}, tagline: '', description: '', about: '', meta: { found: {}, placeholders: 6 }, notes: ['Built from the name only'] };
+  const p = { industry: state.industry ? state.industry.id : '', url, host, name: target.name || host.split('.')[0], colors: {}, nav: [], categories: [], products: [], images: [], headings: [], stats: [], certifications: [], industries: [], contacts: { emails: [], phones: [], address: '' }, social: {}, tagline: '', description: '', about: '', meta: { found: {}, placeholders: 6 }, notes: ['Built from the name only'] };
   say('Built from the name only. Open Edit details to add a logo, colour and contacts.'); showResults(p);
+}
+function suggestIndustry(p, input) {
+  const cur = state.industry && state.industry.id, got = p.industry, info = p.industryInfo || {};
+  if (!got || got === cur) return;
+  const to = INDUSTRIES.find(i => i.id === got && i.ready); if (!to) return;
+  const why = (info.reasons || []).slice(0, 2).join(', ');
+  const el = say(`This site looks like <b>${esc(to.name)}</b>${why ? ` <span style="color:var(--muted)">(${esc(why)})</span>` : ''}, so I picked those designs. <div class="acts"><button class="ghost" data-act="keep">Keep these</button><button class="ghost" data-act="back">Use ${esc((state.industry || {}).name || 'my choice')} designs instead</button></div>`);
+  state.industry = to; $('#indName').textContent = to.name;
+  $('[data-act=back]', el).onclick = () => { el.remove(); const keep = INDUSTRIES.find(i => i.id === cur); if (keep) { state.industry = keep; $('#indName').textContent = keep.name; } generate(input, { force: cur }); };
+  $('[data-act=keep]', el).onclick = () => el.remove();
 }
 function summarize(p, el) {
   const f = p.meta.found, c = p.colors && p.colors.primary;
@@ -264,19 +277,20 @@ $('#editForm').addEventListener('submit', e => {
 $('#shuffleBtn').onclick = () => { state.round = (state.round || 0) + 1; showResults(state.profile, true); toast('New set of five designs'); };
 const readFile = f => new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok({ name: f.name, type: f.type, data: String(r.result).split(',')[1] || '' }); r.onerror = no; r.readAsDataURL(f); });
 function openIntake(prefill = {}) {
-  const f = $('#intakeForm'); f.name.value = prefill.name || (state.profile && state.profile.name) || ''; f.url.value = prefill.url || (state.profile && state.profile.url) || ''; f.gmb.value = ''; f.files.value = ''; $('#intakeErr').textContent = ''; $('#intakeDlg').showModal();
+  const f = $('#intakeForm'); f.name.value = prefill.name || (state.profile && state.profile.name) || ''; f.industry.value = (state.profile && state.profile.industry) || (state.industry && state.industry.id) || ''; f.url.value = prefill.url || (state.profile && state.profile.url) || ''; f.gmb.value = ''; f.files.value = ''; $('#intakeErr').textContent = ''; $('#intakeDlg').showModal();
 }
 $('#intakeBtn').onclick = () => openIntake();
+$('#startDetails').onclick = () => openIntake({ name: '', url: '' });
 $('#intakeForm').addEventListener('submit', async e => {
   if (e.submitter && e.submitter.value !== 'ok') return;
   e.preventDefault(); const f = e.target, err = $('#intakeErr'); err.textContent = ''; const go = $('#intakeGo'); go.disabled = true; go.textContent = 'Reading...';
   try {
     const list = [...f.files.files]; if (list.some(x => x.size > 4e6)) throw new Error('Each file must be under 4 MB.');
     const files = await Promise.all(list.map(readFile));
-    const res = await api('/api/intake', { name: f.name.value, url: f.url.value, gmb: f.gmb.value, files });
+    const res = await api('/api/intake', { name: f.name.value, url: f.url.value, gmb: f.gmb.value, gmbUrl: f.gmbUrl.value, linkedin: f.linkedin.value, notes: f.notes.value, industry: f.industry.value, files });
     if (res.status === 401) { $('#intakeDlg').close(); expired(); return; }
     if (!res.ok) throw new Error(res.error || 'Could not read that');
-    $('#intakeDlg').close(); showResults(res.profile); say(`Built from your files: ${(res.notes || []).map(esc).join(', ') || 'details added'}.${res.visionError ? ' ' + esc(res.visionError) : ''}`);
+    $('#intakeDlg').close(); showResults(res.profile); if (res.profile.industry) { const to = INDUSTRIES.find(i => i.id === res.profile.industry && i.ready); if (to) { state.industry = to; $('#indName').textContent = to.name; } } say(`Built from your files: ${(res.notes || []).map(esc).join(', ') || 'details added'}.${res.visionError ? ' ' + esc(res.visionError) : ''}`);
   } catch (x) { err.textContent = x.message; } finally { go.disabled = false; go.textContent = 'Build designs'; }
 });
 

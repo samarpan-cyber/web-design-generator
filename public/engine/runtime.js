@@ -157,7 +157,8 @@ export function runtime() {
   });
   $$('form[data-contact]').forEach(form => form.addEventListener('submit', e => {
     e.preventDefault(); const f = new FormData(form);
-    mail('Website enquiry', (f.get('m') || '') + '\n\n' + f.get('n') + '\n' + f.get('e'));
+    const more = [...f.entries()].filter(([k, v]) => !['n', 'e', 'm'].includes(k) && String(v).trim()).map(([k, v]) => { const el = form.querySelector('[name="' + k + '"]'); return (el && el.dataset.label || k) + ': ' + v; }).join('\n');
+    mail('Website enquiry', (f.get('m') || '') + (more ? '\n\n' + more : '') + '\n\n' + f.get('n') + '\n' + f.get('e'));
     const ok = $('[data-sent]', form.parentNode); if (ok) ok.hidden = false; form.reset();
   }));
   refresh();

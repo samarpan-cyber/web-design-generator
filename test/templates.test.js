@@ -38,7 +38,7 @@ for (const t of TEMPLATES) {
       assert.ok(html.startsWith('<!doctype html>'));
       assert.ok($('[data-page]').length >= 5, 'at least 5 pages');
       assert.ok($('a[data-go]').length >= 5, 'navigation present');
-      assert.equal($('html').attr('data-theme'), t.family === 'classic' ? 'light' : theme);
+      assert.equal($('html').attr('data-theme'), t.lightOnly ? 'light' : theme);
       assert.ok(!/undefined|NaN|\[object/.test(visible(html).text()), 'no undefined/NaN leaks');
     });
   }
@@ -87,12 +87,15 @@ for (const t of TEMPLATES) {
 }
 
 test('every design in the library uses different font stacks and nav patterns', () => {
-  const sig = TEMPLATES.map(t => { const h = t.render(fixture, {}); return { fonts: (h.match(/family=[^"']+/g) || []).join(','), tpl: (h.match(/data-tpl="([\w-]+)"/) || [])[1] }; });
-  assert.equal(new Set(sig.map(s => s.fonts)).size, TEMPLATES.length, 'unique font combos');
-  assert.equal(new Set(sig.map(s => s.tpl)).size, TEMPLATES.length);
+  for (const ind of ['electronics', 'dentists']) {
+  const group = TEMPLATES.filter(t => t.industries.includes(ind));
+  const sig = group.map(t => { const h = t.render(fixture, {}); return { fonts: (h.match(/family=[^"']+/g) || []).join(','), tpl: (h.match(/data-tpl="([\w-]+)"/) || [])[1] }; });
+  assert.equal(new Set(sig.map(s => s.fonts)).size, group.length, ind + ': unique font combos');
+  assert.equal(new Set(sig.map(s => s.tpl)).size, group.length);
+  }
 });
 
-for (const t of TEMPLATES) {
+for (const t of TEMPLATES.filter(x => x.industries.includes('electronics'))) {
   test(`${t.id}: home page mirrors the site section by section`, () => {
     const $ = visible(t.render(rich, { theme: 'dark' }));
     const home = $('[data-page]').first();

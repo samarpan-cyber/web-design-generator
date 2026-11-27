@@ -46,7 +46,7 @@ async function run(label, viewport, doShare) {
   await page.reload(); await page.waitForSelector('.ind');
   ok(await page.locator('#gate').isVisible(), `${label}: stays logged in after a reload`);
 
-  ok(await page.locator('.ind').count() === 6 && await page.locator('.ind.ready').count() === 1, `${label}: 6 industries, only Electronics ready`);
+  ok(await page.locator('.ind').count() === 7 && await page.locator('.ind.ready').count() === 3, `${label}: 7 industries, Electronics, Dentists and Doctors ready`);
   await page.click('.ind.ready'); await page.waitForSelector('.lead');
   ok(await page.locator('.lead').count() === 19, `${label}: 19 leads load for a logged-in user`);
   await page.fill('#input', 'Temple Electromagnetics'); await page.press('#input', 'Enter');
@@ -104,7 +104,26 @@ async function run(label, viewport, doShare) {
   ok(await page.locator('#gate').isHidden() && (await ctx.request.get(base + '/api/leads')).status() === 401, `${label}: logout locks the generator again`);
   await ctx.close();
 }
-try { await run('desktop', { width: 1440, height: 900 }, true); await run('phone', { width: 390, height: 844 }, false); }
+
+async function runClinic() {
+  const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } }); const page = await ctx.newPage(); const label = 'dentist';
+  page.on('pageerror', e => errs.push(label + ': ' + e.message));
+  await page.goto(base); await page.waitForSelector('#login:not([hidden])'); await page.fill('#loginUser', USER); await page.fill('#loginPass', PASS); await page.click('#loginGo'); await page.waitForSelector('.ind');
+  await page.click('a.ind[href="#/dentists"]'); await page.waitForSelector('#startDetails');
+  ok((await page.locator('#indName').innerText()).includes('Dentists'), `${label}: Dentists opens its own workspace`);
+  await page.click('#startDetails'); await page.waitForSelector('#intakeDlg[open]');
+  await page.fill('#intakeForm [name=name]', 'Smile Care Dental'); await page.fill('#intakeForm [name=gmb]', 'Category: Dentist\nPhone: +91 98765 43210\nAddress: 12 MG Road, Pune\nRating: 4.8 (312 reviews)'); await page.fill('#intakeForm [name=notes]', 'Dr. Anita Rao, orthodontist');
+  await page.click('#intakeGo'); await page.waitForSelector('#grid .card', { timeout: 15000 }); await page.waitForTimeout(2500);
+  const names = await page.locator('#grid .card .meta b').allInnerTexts();
+  ok(names.length === 5, `${label}: five designs from details alone (${names.join(', ')})`);
+  ok(page.url().endsWith('#/dentists/compare'), `${label}: URL stays in the dentist workspace`);
+  await page.click('[data-open="0"]'); await page.waitForTimeout(1500);
+  const fr = page.frameLocator('#vFrame'); const txt = await fr.locator('body').innerText();
+  ok(/Anita Rao/.test(txt) && /4\.8/.test(txt) && /Designed by Digifyo/.test(txt) && /98765 43210/.test(txt), `${label}: design shows the doctor, rating, phone and who designed it`);
+  await page.screenshot({ path: `${out}/${label}-viewer.png` });
+  await ctx.close();
+}
+try { await run('desktop', { width: 1440, height: 900 }, true); await run('phone', { width: 390, height: 844 }, false); await runClinic(); }
 finally { await b.close(); server.kill(); }
 console.log(errs.length ? 'ERRORS:\n' + errs.join('\n') : 'ALL GOOD');
 process.exit(errs.length ? 1 : 0);

@@ -1,0 +1,53 @@
+// Copy for doctor and dentist designs. Rules: short, warm, plain. No dashes. No invented facts:
+// no years of experience, awards, patient counts, prices or ratings. Those only appear when the site or Google data supplied them.
+import { noDash } from './copy.js';
+
+const T = (name, desc) => ({ name, desc });
+export const TREATMENTS = {
+  'dentists:general': [T('Dental checkup and cleaning', 'A thorough look, a gentle clean and a clear plan.'), T('Fillings and repairs', 'Fix the cavity early and keep the tooth.'), T('Root canal treatment', 'Relief from pain while saving your natural tooth.'), T('Teeth whitening', 'A brighter smile, done with care.'), T('Crowns and bridges', 'Strong, natural looking replacements.'), T('Gum care', 'Healthy gums are the base of a healthy smile.'), T('Kids dentistry', 'Friendly visits that make children comfortable.'), T('Dental emergencies', 'Pain, a chipped tooth or swelling? Call us.')],
+  'dentists:implants': [T('Dental implants', 'A fixed, natural looking replacement for missing teeth.'), T('Full mouth rehabilitation', 'One plan to restore how you chew and smile.'), T('Bone and gum support', 'Preparing the ground for a lasting result.'), T('Crowns and bridges', 'Strong, natural looking replacements.'), T('Dentures', 'Comfortable fit, clear explanation.'), T('Checkup and cleaning', 'Keeping your new teeth healthy.')],
+  'dentists:ortho': [T('Braces', 'Straighter teeth with a plan you can follow.'), T('Clear aligners', 'Discreet alignment for busy lives.'), T('Retainers', 'Keep the result you worked for.'), T('Bite correction', 'Better function, not just a better look.'), T('Kids orthodontics', 'Guiding growing teeth at the right time.'), T('Checkup and cleaning', 'A healthy base for every treatment.')],
+  'dentists:kids': [T('First dental visit', 'Short, friendly and nothing scary.'), T('Preventive care', 'Cleaning, sealants and good habits early.'), T('Cavity treatment', 'Gentle repair with a calm approach.'), T('Habit counselling', 'Help with thumb sucking and night feeding.'), T('Space maintenance', 'Protecting room for adult teeth.'), T('Dental emergencies', 'Knocked or chipped tooth? Call us.')],
+  'dentists:cosmetic': [T('Smile design', 'A plan built around your face and your goals.'), T('Teeth whitening', 'A brighter smile, done with care.'), T('Veneers', 'Shape, shade and size, refined.'), T('Clear aligners', 'Discreet alignment for busy lives.'), T('Tooth coloured fillings', 'Repairs that disappear into your smile.'), T('Gum contouring', 'Balance the frame around your teeth.')],
+  'doctors:general': [T('General consultation', 'Time to listen, examine and explain.'), T('Health checkups', 'Know where you stand and what to do next.'), T('Fever and infections', 'Quick diagnosis and a clear treatment plan.'), T('Diabetes and blood pressure', 'Steady, long term control.'), T('Vaccinations', 'Protection for children and adults.'), T('Lab tests and reports', 'Results explained in plain words.'), T('Chronic care follow up', 'Regular reviews that keep you on track.'), T('Home care advice', 'What to do between visits.')],
+  'doctors:skin': [T('Acne treatment', 'A plan that fits your skin, not a trend.'), T('Hair fall treatment', 'Find the cause, then treat it.'), T('Pigmentation care', 'Even tone with safe, steady steps.'), T('Skin allergies and rashes', 'Relief and a way to prevent repeats.'), T('Laser and procedures', 'Done with clear advice on what to expect.'), T('Anti ageing care', 'Healthy skin at every age.')],
+  'doctors:child': [T('Newborn and infant care', 'Reassurance for new parents.'), T('Vaccinations', 'On schedule and without fuss.'), T('Growth and nutrition', 'Track development and feeding.'), T('Fever and infections', 'Quick answers when your child is unwell.'), T('Allergy and asthma care', 'Fewer flare ups, easier days.'), T('Adolescent health', 'A safe place to ask questions.')],
+  'doctors:women': [T('Antenatal care', 'Support at every stage of pregnancy.'), T('Gynaecology consultation', 'Private, respectful and unhurried.'), T('Fertility guidance', 'Understand your options clearly.'), T('Menstrual health', 'Answers for irregular or painful cycles.'), T('Family planning', 'Choices explained without pressure.'), T('Menopause care', 'Comfort and long term health.')],
+  'doctors:bone': [T('Joint pain treatment', 'Find the source and ease the pain.'), T('Sports injuries', 'Recover well and return safely.'), T('Spine and back care', 'Practical help for daily life.'), T('Fracture care', 'Clear plans from first visit to recovery.'), T('Physiotherapy', 'Guided exercises that actually help.'), T('Joint replacement advice', 'Honest guidance on when and why.')],
+  'doctors:heart': [T('Heart checkups', 'Know your risk and your numbers.'), T('ECG and echo tests', 'Clear results, explained to you.'), T('Blood pressure care', 'Steady control with simple routines.'), T('Cholesterol management', 'Practical changes that stick.'), T('Cardiac rehabilitation', 'Rebuild strength after an event.'), T('Second opinions', 'A calm review before big decisions.')],
+  'doctors:eye': [T('Eye examination', 'Sharp answers about your vision.'), T('Cataract care', 'Clear advice on when and how.'), T('Glasses and contact lens advice', 'Comfort for everyday life.'), T('Dry eye treatment', 'Relief from burning and strain.'), T('Retina and glaucoma checks', 'Catch problems early.'), T('Children eye care', 'Early checks make learning easier.')],
+  'doctors:ent': [T('Ear care', 'Treatment for pain, wax and infection.'), T('Sinus and allergy care', 'Breathe easier through the year.'), T('Throat and voice care', 'Answers for persistent problems.'), T('Hearing tests', 'Know where you stand.'), T('Sleep and snoring advice', 'Better nights, better days.'), T('Minor procedures', 'Explained clearly before they begin.')],
+  'doctors:mind': [T('Counselling sessions', 'A calm space to talk and be heard.'), T('Anxiety and stress care', 'Practical tools and steady support.'), T('Depression care', 'A plan you can follow.'), T('Sleep problems', 'Find the cause, rebuild the routine.'), T('Teen and family support', 'Help for the whole household.'), T('Follow up care', 'Regular check ins that keep progress going.')],
+  'doctors:diabetes': [T('Diabetes care', 'Long term control without the guesswork.'), T('Thyroid care', 'Clear tests, clear treatment.'), T('Weight and metabolic health', 'Plans built around real life.'), T('Hormone concerns', 'Answers for fatigue, cycles and growth.'), T('Diet guidance', 'Food advice you can live with.'), T('Regular monitoring', 'Reviews that keep numbers on track.')],
+  'doctors:ayush': [T('Ayurvedic consultation', 'Care that looks at the whole person.'), T('Panchakarma and therapies', 'Traditional treatment, carefully guided.'), T('Homeopathic care', 'Gentle treatment with patient follow up.'), T('Lifestyle and diet advice', 'Habits that support healing.'), T('Stress and sleep care', 'Restore balance naturally.'), T('Chronic condition support', 'A steady plan with regular reviews.')]
+};
+export const treatmentsFor = (industry, specialty) => TREATMENTS[`${industry}:${specialty}`] || TREATMENTS[`${industry}:general`] || TREATMENTS['doctors:general'];
+
+const H = {
+  dentists: ['Gentle dental care, explained clearly', 'A dental visit you will not dread', 'Healthy teeth, a confident smile', 'Dental care that listens first', 'Your smile, in careful hands'],
+  doctors: ['Care that listens before it prescribes', 'Clear answers and calm care', 'Your health, in careful hands', 'Time for your questions, time to heal', 'Medical care that treats you as a person']
+};
+export function clinicHeadline(industry, seed = 0) { const a = H[industry] || H.doctors; return a[Math.abs(seed) % a.length]; }
+
+export const CLINIC = {
+  nav: { home: 'Home', about: 'About', treatments: 'Treatments', patients: 'Patients', book: 'Book a Visit' },
+  kicker: n => `Welcome to ${n}`,
+  ctaBook: 'Book an Appointment', ctaCall: 'Call the Clinic', ctaSend: 'Request Appointment',
+  aboutK: 'About the clinic', aboutT: 'Care you can trust, one patient at a time',
+  servK: 'What we treat', servT: 'Treatments and services', servS: 'Tell us what is bothering you and we will guide you to the right care.', servT2: 'Find the right treatment', servS2: 'Every treatment starts with a conversation, so ask before you decide.',
+  doctorsK: 'Meet the doctors', doctorsT: 'Who will look after you',
+  whyK: 'Why patients choose us', whyT: 'A calmer way to get care',
+  why: [['Time to talk', 'Questions are welcome, and answers are given in plain words.'], ['A clear plan', 'You know what is wrong, what we will do and what comes next.'], ['Respect for your time', 'Booking is simple and visits start as planned.'], ['Follow up that happens', 'We check in so treatment does not stop at the door.']],
+  stepsK: 'How a visit works', stepsT: 'Four simple steps',
+  steps: [['Book a time', 'Use the form or call the clinic.'], ['Meet the doctor', 'Share your history and your worries.'], ['Get a clear plan', 'Understand options before you decide.'], ['Stay on track', 'Follow up until you are well.']],
+  testiK: 'Patient words', testiT: 'What patients say',
+  faqK: 'Good to know', faqT: 'Common questions',
+  faq: [['How do I book an appointment?', 'Use the booking form on this site or call the clinic. We confirm your slot by phone or message.'], ['What should I bring to the first visit?', 'Past reports, a list of medicines you take and any questions you want to ask.'], ['Can I come in without an appointment?', 'Please call first. In an emergency, tell us when you ring and we will do our best to see you quickly.'], ['How can I pay?', 'Ask the clinic when you book. They will tell you which payment options are available.']],
+  hoursK: 'Opening hours', visitK: 'Visit us', contactK: 'Book a visit', contactT: 'Request your appointment', contactS: 'Share a few details and the clinic will confirm your time.',
+  bandT: 'Ready to feel better?', bandS: 'Book a visit and the clinic will take it from there.', bandBtn: 'Book Now',
+  foot: 'Caring for patients with time, honesty and respect.',
+  formN: 'Your name', formE: 'Email', formP: 'Phone', formD: 'Preferred day or time', formM: 'What would you like help with?'
+};
+
+/** Everything the templates print, cleaned of dashes. */
+export function clinicCopy(industry) { const o = JSON.parse(JSON.stringify(CLINIC)); const walk = x => { if (typeof x === 'string') return noDash(x); if (Array.isArray(x)) return x.map(walk); if (x && typeof x === 'object') return Object.fromEntries(Object.entries(x).map(([k, v]) => [k, walk(v)])); return x; }; const c = walk(o); c.kicker = n => noDash(CLINIC.kicker(n)); c.industry = industry; return c; }
