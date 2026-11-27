@@ -1,6 +1,6 @@
 {
   "name": "web-design-generator",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "Pick an industry, paste a company website, get 5 distinct five-page redesign concepts.instantly.",
   "type": "module",
   "main": "local-server.js",
@@ -11,8 +11,12 @@
     "leads": "node scripts/build-leads.js",
     "auth": "node scripts/make-auth.mjs"
   },
-  "engines": { "node": ">=20" },
-  "dependencies": { "cheerio": "1.0.0" },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "cheerio": "1.0.0"
+  },
   "license": "UNLICENSED",
   "private": true
 }

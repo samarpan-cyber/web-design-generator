@@ -1,4 +1,4 @@
-# Design Generator V4
+# Design Generator V4.1
 
 Log in, pick an industry, paste a company website, and get **five distinct, mobile-ready, five-page redesign concepts** built from that company's real content. Share them with the client through a private link that stops working after 48 hours.
 
@@ -6,7 +6,13 @@ Log in, pick an industry, paste a company website, and get **five distinct, mobi
 login → industry → website or lead → /api/analyze reads the live site → profile → 5 designs → share link
 ```
 
-## What V4 adds
+## What V4.1 adds
+
+- **Doctors and Dentists.** Two new industries on the home page, with eight clinic designs (four creative, four plain WordPress/Elementor style). Built from research into top clinic sites: booking above the fold, hours and location, named doctors with credentials, reviews, calm colours, one consistent treatment layout and an FAQ. Doctor names, hours, ratings and reviews are shown only when the site or your details contain them.
+- **Smart industry detection.** `public/engine/industry.js` works out the industry from the website, Google Business category, LinkedIn headline, notes, lead industry and title. The result and the reasons are shown, and you can switch back. **Add data** takes a LinkedIn link, a Google Maps link, pasted Google Business text, notes and files, and **No website? Start from details** builds a set from those alone.
+- Add a template in `public/engine/index.js` and it joins the pool for the industries it lists.
+
+## What V4 added
 
 - **Plain, WordPress-style designs.** Four extra designs (Corporate Classic, Industrial Pro, Clean Catalog, Modern Business) that look hand-built on WordPress with Elementor: Open Sans, Roboto, Lato and Poppins, top bar, photo hero, icon boxes, grey placeholders where there is no photo. Each set of five is three creative plus two plain designs. **Shuffle set** picks another combination from the library (`public/engine/index.js`, add a template there and it joins the pool).
 - **Sites that cannot be crawled.** **Add data** takes an Excel or CSV product list, a sitemap.xml, Google Business text or JSON, or a screenshot. Screenshots are read by a vision model when `ANTHROPIC_API_KEY` is set (optional `VISION_MODEL`).
