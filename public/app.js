@@ -97,6 +97,7 @@ async function generate(input) {
   const t = input.trim();
   if (/^(dark|light|auto)( mode)?$/i.test(t)) { const v = t.split(' ')[0].toLowerCase(); say(esc(t), 'me'); setMode(v); say(`Previews switched to <b>${v}</b>.`); return; }
   say(esc(t), 'me');
+  await state.leadsReady;
   const target = resolveInput(t);
   if (!target) { say('I need a website address, like <b>example.com</b>, or a company name from your lead list.', 'bot err'); return; }
   state.busy = true; $('#go').disabled = true;
@@ -251,7 +252,7 @@ function boot() {
   state.booted = true;
   say('Paste a website or pick a lead. I will build five concepts from the real site.');
   say('Tip: type <b>dark</b> or <b>light</b> to flip every preview.');
-  loadLeads();
+  state.leadsReady = loadLeads();
   fetch('/api/config').then(r => r.json()).catch(() => ({}));
 }
 renderGate(); route();
