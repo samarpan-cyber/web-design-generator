@@ -1,77 +1,81 @@
-# Design Generator
+# Design Generator V2
 
-Paste any company website → get **5 modern, interactive redesign concepts** built from that company's *real* content (name, logo, brand colour, products, images, contacts, certifications). Built to pitch electronics / hardware companies directly with "here's your site, redesigned".
+Pick an industry, paste a company website, and get **five distinct, mobile-ready, five-page redesign concepts** built from that company's real content. Built to pitch electronics and hardware companies with "here is your site, redesigned".
 
 ```
-chat box ──► /api/analyze (reads the live site) ──► profile JSON ──► 5 template engines ──► live previews
+industry → website or lead → /api/analyze reads the live site → profile → 5 template engines → previews
 ```
 
-## The five concepts
+## What is new in V2
 
-| # | Concept | Default | Signature effects |
-|---|---------|---------|-------------------|
-| 1 | **Circuit Noir** | dark | Animated PCB-trace canvas with travelling pulses, spotlight-border cards, drag-scroll product rail, scroll-filled process timeline |
-| 2 | **Bento Lab** | light | Floating pill nav, hero visual that scales/tilts with scroll, 3D-tilt bento grid, product shelf |
-| 3 | **Blueprint** | dark (blueprint) / light (drafting paper) | Self-drawing SVG schematic, crosshair cursor with live X/Y readout, datasheet-style cards with scan-line hover |
-| 4 | **Aurora Glass** | dark | Drifting gradient mesh, glassmorphism, pinned scroll-storytelling, draggable carousel |
-| 5 | **Kinetic** | light | Giant type, scroll-velocity-skewed marquee, scroll-lit statement text, hover-image product index, cursor follower |
+- **Industry picker first.** The generator opens by asking which industry you are designing for. Electronics is live. Manufacturing, Healthcare, Real estate, Logistics and Software are placeholders.
+- **Five genuinely different designs**, each with its own fonts, navigation pattern and page layouts (table below).
+- **Every design is a five-page site** (home, catalogue, sectors, company, contact) with working navigation, a real contact form and a quote basket.
+- **Copy engine.** One short, witty, action-driving voice. No em or en dashes anywhere, no walls of text, no repeated lines. Tests enforce all three.
+- **Smoother scrolling.** One batched scroll loop, no per-scroll style invalidation, no full-page blur or blend effects. Previews stay calm until hovered.
+- **Back to the generator, always.** Full-screen view has its own URL, so the browser Back button works. Tabs opened from the generator carry a "Back to Design Generator" pill.
+- **Pitch tools.** Star your favourites, then copy a ready-to-send pitch note. Loading skeletons, mobile layout, stepper.
 
-Every concept ships with: dark/light toggle · scroll-reveal animations · hover effects · live product search · **quote basket (RFQ)** that opens the visitor's email client addressed to the company · mobile layout · `prefers-reduced-motion` support · broken-image fallback (generated product artwork).
+## The five designs
 
-Research basis: 2026 hardware/tech design roundups (dark-first palettes, bento grids, scroll-driven product storytelling, per-product interactivity) plus B2B electronics conventions (datasheet/spec language, RFQ-first CTAs, certification badges).
+| Design | Look | Fonts | Navigation | Signature |
+|---|---|---|---|---|
+| **Circuit Noir** | Dark tech | Space Grotesk, JetBrains Mono | Top bar | Live circuit canvas, drag rail, Ctrl K command palette |
+| **Bento Lab** | Warm cream, editorial | DM Serif Display, DM Sans | Floating pill | Bento tiles, scroll-tilting hero, masonry catalogue |
+| **Blueprint** | Engineering sheet | Barlow Condensed, IBM Plex Mono | Left sheet index | Self-drawing schematic, table catalogue, RFQ form, crosshair |
+| **Aurora Glass** | Soft futurism | Sora | Bottom dock | Pinned scroll story, glass cards, gradient glow |
+| **Kinetic** | Loud editorial | Bricolage Grotesque, Instrument Serif | Full-screen menu | Giant type, velocity marquee, hover-preview index |
+
+All five have dark and light mode, scroll reveals, hover effects, product search and a quote basket that opens the visitor's email app addressed to the company.
 
 ## Using it
 
-1. Type a URL (`temple-emc.com`) or a company name from your leads (`Temple Electromagnetics`), or click a lead card.
-2. Five live previews appear. **Hover → Interact** to scroll a design inside its card. **Full screen** opens present mode (desktop / tablet / mobile switch, dark/light, ←/→ between concepts, Esc to close).
-3. **Edit details** fixes anything the scraper missed (name, headline, colour, logo, contacts, your agency name) and re-renders all five instantly.
-4. **Download .html** gives a single self-contained file per concept to send to the prospect.
-5. Type `dark` / `light` / `auto` in the chat to flip all previews.
+1. Choose **Electronics and hardware**.
+2. Type a URL (`temple-emc.com`), a company name from your leads, or click a lead card.
+3. Five live previews appear. Hover one to wake it up, or tap "Tap to scroll it". **Full screen** opens present mode (desktop, tablet, phone, dark, light, arrow keys).
+4. Star favourites, **Copy pitch note**, then **Download** the HTML files to send.
+5. **Edit details** fixes anything the scraper missed and updates all five at once.
 
 ## Run locally
 
 ```bash
 npm install
-npm start            # http://localhost:3000
-npm test             # extractor + template safety tests
+npm start      # http://localhost:3000
+npm test       # extractor, copy rules, template safety
 ```
 
-Your CRM export lives in `data/leads.csv` (git-ignored). Rebuild the chat's lead list with `npm run leads` — only company / website / city are published to the browser (no emails or phone numbers).
+`data/leads.csv` (git-ignored) feeds `npm run leads`, which writes `public/leads.json` (company, website, city only).
 
 ## Deploy
 
-The app is a static frontend + one stateless function (`/api/analyze`), so it runs anywhere:
+Static frontend plus one stateless function, so it runs anywhere.
 
-- **Vercel (simplest):** import the repo → deploy. `vercel.json` and `api/` are already set up.
-- **Render / Railway / Fly / any VPS:** `npm start` (Node ≥ 20), or use the included `Dockerfile`.
+- **Vercel:** import the repo. `vercel.json` forces the static preset; `api/` holds the functions.
+- **Render, Railway, Fly, VPS:** `npm start` (Node 20 or newer) or the included `Dockerfile`. The entry file is `local-server.js`.
 
-Environment variables:
-
-| Var | Purpose |
-|-----|---------|
-| `ACCESS_KEY` | *(recommended)* If set, the API requires this key; the UI prompts once per browser session. Prevents strangers using your deployment to fetch arbitrary sites. |
+| Variable | Purpose |
+|---|---|
+| `ACCESS_KEY` | Recommended. If set, the API requires this key and the UI asks for it once per session. The variable name must be exactly `ACCESS_KEY`. |
 | `PORT` | Node server port (default 3000) |
 
-Built-in protections: SSRF guard (private/loopback/metadata IPs blocked, re-checked on every redirect), 12 s timeout, 2.5 MB response cap, per-IP rate limit (20/min), HTML-escaped output + URL scheme allow-listing, designs rendered in sandboxed iframes.
+Protections: SSRF guard (private and metadata addresses blocked, re-checked on every redirect), 12 s timeout, 2.5 MB cap, per-IP rate limit, HTML escaping and URL allow-listing, previews in sandboxed iframes.
 
-> The scraper must run somewhere with open internet access. Locked-down networks (e.g. a sandbox with an allow-list) will return "domain could not be found".
+## Limits
 
-## Known limits (be upfront with prospects' sites)
+- Sites that build pages entirely with JavaScript expose little HTML. The chat says so and Edit details fills the gaps.
+- Product photos are hot-linked. A site that blocks hot-linking falls back to generated artwork.
+- Copy is written to be accurate and generic: it never invents numbers, awards or claims. Stats come from the site or are counts of what was found.
+- When fewer than six real products are found, placeholder names are used and the chat flags it.
 
-- Sites that build their pages entirely with JavaScript (SPAs) expose little in raw HTML. The UI warns you, and **Edit details** lets you fill the gaps.
-- Product photos are hot-linked from the live site. Downloaded `.html` files therefore need internet access, and a site that blocks hot-linking will fall back to generated artwork.
-- Sections like "process", "applications" and some headings are **draft sample copy** — review before sending. Placeholders (when fewer than 6 products are found) are flagged in the chat.
-- Statistics shown come from the site's own text (e.g. "20+ years") or are counts of what was found; nothing is invented.
-
-## Project layout
+## Layout
 
 ```
-public/            frontend (chat UI, preview grid, present mode)
-  engine/          the 5 templates + shared helpers + in-page runtime
-lib/               extractor (cheerio), safe fetcher, colour utils, API handler
-api/               Vercel functions        local-server.js  plain Node server (non-Vercel hosts)
-scripts/           build-leads · shoot (screenshots) · e2e (browser smoke test)
-test/              unit tests + HTML fixture
+public/            frontend (industry gate, chat, previews, present mode)
+  engine/          copy.js (voice), common.js (model + shell), runtime.js (router, scroll, quote basket), t1 to t5 (designs)
+lib/               extractor, safe fetcher, colour utils, API handler
+api/               Vercel functions       local-server.js  plain Node server
+scripts/           build-leads, shoot (screenshots + overflow), e2e, live-test, live-e2e
+test/              unit tests + fixture
 ```
 
-Add a sixth concept: create `public/engine/t6-name.js` exporting a `render(profile, opts)` function (copy any existing template) and register it in `public/engine/index.js`.
+Add a sixth design: copy any `public/engine/tN-*.js`, give it a new voice index in `copy.js`, and register it in `public/engine/index.js`. Add an industry by adding it to `INDUSTRIES` in `public/app.js` once it has its own leads and copy.

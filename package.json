@@ -1,7 +1,7 @@
 {
   "name": "web-design-generator",
-  "version": "1.0.0",
-  "description": "Paste any company website and get 5 modern, interactive redesign concepts instantly.",
+  "version": "2.0.0",
+  "description": "Pick an industry, paste a company website, get 5 distinct five-page redesign concepts.instantly.",
   "type": "module",
   "main": "local-server.js",
   "scripts": {

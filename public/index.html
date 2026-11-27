@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en" data-ui="dark">
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Design Generator — 5 website concepts in seconds</title>
-<meta name="description" content="Paste any company website and instantly get five modern, interactive redesign concepts to pitch.">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Design Generator | Five website concepts in seconds</title>
+<meta name="description" content="Pick an industry, paste a company website, and get five modern, mobile-ready redesign concepts to pitch.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%237c5cff'/%3E%3Cpath d='M8 20l5-8 4 6 3-4 4 6' stroke='white' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -12,59 +12,75 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16l5-8 4 6 3-4 6 6"/></svg></span><b>Design Generator</b><em>for electronics companies</em></div>
-  <div class="top-actions">
+  <a class="brand" href="#/" aria-label="Design Generator home"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16l5-8 4 6 3-4 6 6"/></svg></span><b>Design Generator</b><em class="ver">V2</em></a>
+  <ol class="steps" id="steps" aria-label="Progress">
+    <li data-s="1"><i>1</i>Industry</li><li data-s="2"><i>2</i>Website</li><li data-s="3"><i>3</i>Compare</li><li data-s="4"><i>4</i>Pitch</li>
+  </ol>
+  <div class="top-actions" id="topActions" hidden>
+    <a class="ghost" href="#/" id="changeInd">Change industry</a>
     <div class="seg" id="themeSeg" role="group" aria-label="Preview theme"><button data-t="auto" class="on">Auto</button><button data-t="dark">Dark</button><button data-t="light">Light</button></div>
     <button class="ghost" id="editBtn" disabled>Edit details</button>
   </div>
 </header>
 
-<main class="layout">
+<!-- Step 1: industry -->
+<main class="gate" id="gate">
+  <div class="gate-in">
+    <p class="eyebrow">Step 1 of 4</p>
+    <h1>Which industry are we<br><span>designing for today?</span></h1>
+    <p class="sub">Each industry comes with its own lead list, tone and layouts. Pick one to begin.</p>
+    <div class="ind-grid" id="indGrid"></div>
+  </div>
+</main>
+
+<!-- Steps 2 to 4: generator -->
+<main class="layout" id="app" hidden>
   <aside class="chat" aria-label="Chat">
+    <div class="chat-head"><b id="indName">Electronics</b><span>Paste a website or pick a lead</span></div>
     <div class="msgs" id="msgs" aria-live="polite"></div>
     <div class="quick" id="quick"></div>
     <form class="composer" id="form" autocomplete="off">
-      <input id="input" placeholder="Paste a website or type a company name…" aria-label="Website or company" list="leadlist" autofocus>
+      <input id="input" placeholder="Website or company name" aria-label="Website or company name" list="leadlist" enterkeyhint="go">
       <datalist id="leadlist"></datalist>
-      <button class="go" id="go" aria-label="Generate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      <button class="go" id="go" aria-label="Generate designs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     </form>
   </aside>
 
   <section class="stage" id="stage">
     <div class="welcome" id="welcome">
-      <p class="eyebrow">Pitch-ready in seconds</p>
-      <h1>Paste a website.<br><span>Get five better ones.</span></h1>
-      <p class="sub">We read the live site — name, logo, brand colour, products, images, contacts — and rebuild it in five modern, animated designs with dark &amp; light mode and a built-in quote basket.</p>
-      <div class="leads-head"><h3>Your leads</h3><input id="leadSearch" placeholder="Filter leads…" aria-label="Filter leads"></div>
+      <p class="eyebrow">Step 2 of 4</p>
+      <h2>Paste a website.<br><span>Get five better ones.</span></h2>
+      <p class="sub">We read the live site, then rebuild it five different ways. Real products, real branding, five pages each, mobile ready.</p>
+      <div class="leads-head"><h3>Your leads</h3><input id="leadSearch" placeholder="Filter leads" aria-label="Filter leads"></div>
       <div class="leads" id="leads"></div>
     </div>
     <div class="results" id="results" hidden>
-      <div class="res-head"><div><h2 id="resTitle"></h2><p id="resMeta"></p></div><div class="res-actions"><button class="ghost" id="dlAll">Download all 5</button></div></div>
+      <div class="res-head"><div><p class="eyebrow">Step 3 of 4</p><h2 id="resTitle"></h2><p id="resMeta"></p></div>
+        <div class="res-actions"><button class="ghost" id="pitchBtn">Copy pitch note</button><button class="ghost" id="dlAll">Download all 5</button></div></div>
       <div class="grid" id="grid"></div>
     </div>
   </section>
 </main>
 
-<div class="viewer" id="viewer" hidden>
+<div class="viewer" id="viewer" hidden role="dialog" aria-label="Full design preview">
   <div class="v-bar">
-    <button class="ghost" id="vClose">✕ Close</button>
+    <button class="primary" id="vClose">← Back to generator</button>
     <div class="v-title"><b id="vName"></b><span id="vCount"></span></div>
-    <div class="seg" id="devSeg"><button data-d="100%" class="on">Desktop</button><button data-d="820px">Tablet</button><button data-d="390px">Mobile</button></div>
+    <div class="seg" id="devSeg"><button data-d="100%" class="on">Desktop</button><button data-d="820px">Tablet</button><button data-d="390px">Phone</button></div>
     <div class="seg" id="vThemeSeg"><button data-t="dark">Dark</button><button data-t="light">Light</button></div>
     <div class="v-nav"><button class="ghost" id="vPrev" aria-label="Previous design">←</button><button class="ghost" id="vNext" aria-label="Next design">→</button></div>
-    <button class="primary" id="vDl">Download .html</button>
+    <button class="ghost" id="vDl">Download</button>
   </div>
   <div class="v-body"><iframe id="vFrame" title="Full preview" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe></div>
 </div>
 
 <dialog id="editDlg"><form method="dialog" class="edit" id="editForm">
-  <h3>Edit extracted details</h3><p class="hint">Fix anything the scraper missed — all five designs update instantly.</p>
+  <h3>Edit extracted details</h3><p class="hint">Fix anything the scraper missed. All five designs update instantly.</p>
   <label>Company name<input name="name"></label>
-  <label>Headline<input name="tagline"></label>
-  <label>Description<textarea name="description" rows="3"></textarea></label>
+  <label>Short description<textarea name="description" rows="3"></textarea></label>
   <div class="two"><label>Brand colour<input name="color" type="color"></label><label>Prepared by (agency)<input name="agency"></label></div>
-  <label>Logo URL<input name="logo" placeholder="https://…"></label>
-  <label>Email<input name="email"></label><label>Phone<input name="phone"></label>
+  <label>Logo URL<input name="logo" placeholder="https://"></label>
+  <div class="two"><label>Email<input name="email"></label><label>Phone<input name="phone"></label></div>
   <div class="dlg-actions"><button value="cancel" class="ghost">Cancel</button><button value="ok" class="primary">Apply</button></div>
 </form></dialog>
 <div class="toast" id="toast"></div>
