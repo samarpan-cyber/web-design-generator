@@ -1,13 +1,14 @@
 // node scripts/live-test.mjs <baseUrl> [accessKey]  -> calls /api/analyze for every lead, prints a report + saves profiles
 import fs from 'node:fs';
-const base = process.argv[2], key = process.argv[3];
-const leads = JSON.parse(fs.readFileSync(new URL('../public/leads.json', import.meta.url), 'utf8'));
+import { loginCookie } from './_login.mjs';
+const base = process.argv[2]; const cookie = await loginCookie(base);
+const leads = await (await fetch(base + '/api/leads', { headers: { cookie } })).json();
 const out = process.env.OUT || '/tmp/claude-0/live'; fs.mkdirSync(out, { recursive: true });
 const rows = [];
 for (const [i, l] of leads.entries()) {
   const t0 = Date.now(); let status = 0, j = {};
   try {
-    const r = await fetch(base + '/api/analyze', { method: 'POST', headers: { 'content-type': 'application/json', ...(key ? { 'x-access-key': key } : {}) }, body: JSON.stringify({ url: l.website, name: l.company }), signal: AbortSignal.timeout(40000) });
+    const r = await fetch(base + '/api/analyze', { method: 'POST', headers: { 'content-type': 'application/json', cookie }, body: JSON.stringify({ url: l.website, name: l.company }), signal: AbortSignal.timeout(40000) });
     status = r.status; const txt = await r.text(); try { j = JSON.parse(txt); } catch { j = { error: txt.slice(0, 80) }; }
   } catch (e) { j = { error: e.message }; }
   const ms = Date.now() - t0, p = j.profile;

@@ -64,3 +64,14 @@ dialog{border:1px solid var(--line);border-radius:22px;background:var(--panel);c
 @media(max-width:760px){.top{flex-wrap:wrap;gap:4px 8px;padding-bottom:6px}.steps{order:3;flex-basis:100%;justify-content:space-between}.steps button{min-height:44px}.top-actions .seg button{padding:7px 10px}#changeInd{display:none}.ver{display:none}.top-actions{gap:6px}}
 @media(max-width:560px){.two{grid-template-columns:1fr}.leads-head{flex-direction:column;align-items:stretch}.v-bar{gap:8px}.v-bar .seg{order:5}#devSeg{display:none}.v-title{order:2;flex-basis:100%}#vClose{order:1}.v-nav{order:3}#vDl{order:4}.res-actions{width:100%}.res-actions button{flex:1}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* login + account */
+.login{min-height:calc(100vh - 62px);display:grid;place-items:center;padding:24px;background:radial-gradient(900px 500px at 70% -10%,rgba(124,92,255,.18),transparent),var(--bg)}
+.login-card{width:min(420px,100%);display:grid;gap:14px;padding:30px;border-radius:24px;border:1px solid var(--line);background:var(--panel);box-shadow:0 30px 80px -40px rgba(0,0,0,.7)}
+.login-card h1{margin:6px 0 0;font-size:30px;letter-spacing:-.03em}.login-card .sub{margin:0 0 6px;font-size:15px}.login-card label{display:grid;gap:6px;font-size:12px;font-weight:600;color:var(--muted)}
+.login-card input{padding:14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--fg);outline:none;font-size:16px;width:100%}.login-card input:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(124,92,255,.18)}
+.mark.big{width:48px;height:48px;border-radius:14px}.mark.big svg{width:26px}.primary.wide{width:100%;min-height:50px;font-size:15px}
+.login-msg{margin:0;color:#ff8a9b;font-size:13px;min-height:18px}
+.who{display:flex;align-items:center;gap:10px}.who-name{font-size:13px;color:var(--muted);font-weight:600}
+body.is-login .steps{visibility:hidden}
+.share-state{margin:0;font-weight:600;font-size:14px}#shareLink{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--acc2);background:var(--bg);color:var(--fg);font:13px 'JetBrains Mono',monospace}
+@media(max-width:760px){.who-name{display:none}}

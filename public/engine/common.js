@@ -171,6 +171,8 @@ function buildHomeSections(p, m) {
     if (out.length >= 6) break;
     if (s.kind === 'cta') continue;
     const heading = tidy(s.heading || '').slice(0, 64); if (!heading) continue;
+    if (prodKeys.has(lowKey(heading))) continue; // a product page, not a homepage section
+    if (s.kind === 'split' && out.filter(x => x.kind === 'split').length >= 3) continue;
     let text = s.text ? brief(s.text, 150) : '';
     if (text && aboutKey && lowKey(text) === aboutKey) { aboutTaken = true; seen.delete(aboutKey); }
     if (text && seen.has(lowKey(text))) text = '';

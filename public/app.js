@@ -23,7 +23,7 @@ const INDUSTRIES = [
   { id: 'software', name: 'Software and IT', blurb: 'SaaS, agencies and IT services.' }
 ];
 
-const state = { leads: [], profile: null, mode: 'auto', agency: store.get('wdg-agency') ?? 'Digifyo', busy: false, viewer: 0, pushedView: false, favs: new Set(), booted: false, industry: null };
+const state = { user: null, shareUrl: null, shareExp: 0, leads: [], profile: null, mode: 'auto', agency: store.get('wdg-agency') ?? 'Digifyo', busy: false, viewer: 0, pushedView: false, favs: new Set(), booted: false, industry: null };
 
 /* ---------------- chrome helpers ---------------- */
 const toast = t => { const el = $('#toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 2000); };
@@ -35,6 +35,7 @@ const generatorUrl = () => location.origin + location.pathname + '#/electronics'
 /* ---------------- routing: #/ (industry) -> #/electronics -> #/electronics/view/N ---------------- */
 function navTo(hash, replace) { if (replace) { history.replaceState(null, '', hash); route(); } else location.hash = hash; }
 function route() {
+  if (!state.user) { showLogin(); return; }
   const m = (location.hash || '#/').match(/^#\/([a-z]+)(?:\/(compare))?(?:\/view\/(\d))?$/);
   const ind = m && INDUSTRIES.find(i => i.id === m[1] && i.ready);
   if (!ind) { showGate(); return; }
@@ -43,6 +44,33 @@ function route() {
   showApp(ind, wantsCompare && !!state.profile);
   if (m[3] !== undefined && state.profile && +m[3] < TEMPLATES.length) showViewer(+m[3]); else hideViewer();
 }
+/* ---------------- login ---------------- */
+function showLogin(msg) {
+  hideViewer(); document.body.classList.add('is-login');
+  $('#login').hidden = false; $('#gate').hidden = true; $('#app').hidden = true; $('#topActions').hidden = true; $('#who').hidden = true;
+  $('#loginMsg').textContent = msg || ''; document.title = 'Design Generator | Log in';
+  setTimeout(() => $('#loginUser').focus(), 50);
+}
+function enterApp(user) {
+  state.user = user; document.body.classList.remove('is-login'); $('#login').hidden = true; $('#who').hidden = false; $('#whoName').textContent = user;
+  if (!state.booted) renderGate(); route();
+}
+$('#loginForm').addEventListener('submit', async e => {
+  e.preventDefault(); const btn = $('#loginGo'); btn.disabled = true; $('#loginMsg').textContent = '';
+  try {
+    const r = await fetch('/api/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ username: $('#loginUser').value, password: $('#loginPass').value }) });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok && j.ok) { $('#loginPass').value = ''; enterApp(j.user); } else $('#loginMsg').textContent = j.error || 'Could not log in';
+  } catch { $('#loginMsg').textContent = 'Could not reach the server'; }
+  btn.disabled = false;
+});
+async function logout() {
+  try { await fetch('/api/logout', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' }); } catch { /* ignore */ }
+  state.user = null; state.profile = null; state.shareUrl = null; state.booted = false; $('#msgs').innerHTML = ''; history.replaceState(null, '', '#/'); showLogin('You are logged out.');
+}
+$('#logout').onclick = logout;
+const expired = () => { state.user = null; showLogin('Your session ended. Please log in again.'); };
+
 function showGate() {
   hideViewer(); $('#gate').hidden = false; $('#app').hidden = true; $('#topActions').hidden = true; setStep(1); document.title = 'Design Generator | Pick an industry'; window.scrollTo(0, 0);
 }
@@ -65,7 +93,7 @@ function renderGate() {
 
 /* ---------------- leads ---------------- */
 async function loadLeads() {
-  try { state.leads = await (await fetch('leads.json')).json(); } catch { state.leads = []; }
+  try { const r = await fetch('/api/leads'); if (r.status === 401) { expired(); state.leads = []; return; } state.leads = await r.json(); } catch { state.leads = []; }
   $('#leadlist').innerHTML = state.leads.map(l => `<option value="${esc(l.company)}">`).join('');
   $('#quick').innerHTML = state.leads.slice(0, 8).map(l => `<button data-lead="${esc(l.company)}">${esc(l.company.split('/')[0].trim())}</button>`).join('');
   drawLeads('');
@@ -89,9 +117,7 @@ function resolveInput(text) {
 
 /* ---------------- generation ---------------- */
 async function api(path, body) {
-  const headers = { 'content-type': 'application/json' };
-  const key = sessionStorage.getItem('wdg-key'); if (key) headers['x-access-key'] = key;
-  const r = await fetch(path, { method: 'POST', headers, body: JSON.stringify(body) });
+  const r = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
   return { status: r.status, ...(await r.json().catch(() => ({}))) };
 }
 function showSkeletons() {
@@ -114,11 +140,7 @@ async function generate(input) {
   const ticker = setInterval(() => { if (i < lis.length - 1) lis[i++].classList.add('done'); }, 1000);
   let res; try { res = await api('/api/analyze', { url: target.url, name: target.name }); } catch { res = { status: 0, error: 'Could not reach the generator service' }; }
   clearInterval(ticker); state.busy = false; $('#go').disabled = false;
-  if (res.status === 401) {
-    bot.remove(); const k = prompt('This deployment is protected. Enter the access key:');
-    if (k) { sessionStorage.setItem('wdg-key', k); say('Key saved. Trying again.'); return generate(input); }
-    say('Access key needed.', 'bot err'); $('#results').hidden = true; $('#welcome').hidden = false; return;
-  }
+  if (res.status === 401) { bot.remove(); $('#results').hidden = true; $('#welcome').hidden = false; expired(); return; }
   if (!res.ok) {
     $('#results').hidden = true; $('#welcome').hidden = false;
     bot.className = 'msg bot err';
@@ -151,7 +173,7 @@ const effectiveTheme = t => (state.mode === 'auto' ? t.defaultTheme : state.mode
 function post(frame, msg) { try { frame.contentWindow.postMessage(msg, '*'); } catch { /* ignore */ } }
 
 function showResults(profile) {
-  state.profile = profile; state.favs = new Set();
+  state.profile = profile; state.favs = new Set(); state.shareUrl = null;
   $('#welcome').hidden = true; $('#results').hidden = false; $('#editBtn').disabled = false; $('#pitchBtn').disabled = false; $('#dlAll').disabled = false; $('#resume').hidden = true; setStep(3);
   document.title = `${profile.name} | Design Generator`;
   $('#resTitle').textContent = profile.name; $('#resMeta').textContent = `${profile.host}. Five concepts, five pages each. Star your favourites, then copy the pitch note.`;
@@ -189,7 +211,7 @@ function download(i) {
 function openTab(i) { const url = URL.createObjectURL(new Blob([htmlFor(TEMPLATES[i], { back: generatorUrl() })], { type: 'text/html' })); window.open(url, '_blank'); setTimeout(() => URL.revokeObjectURL(url), 120000); }
 function pitchNote() {
   const p = state.profile, picks = [...state.favs].sort().map(i => TEMPLATES[i].name);
-  return [`Hi ${p.name} team,`, '', `I rebuilt ${p.host} as five fresh website concepts, using your real products and branding. Each one has five pages, works on phones, and includes dark mode, product search and a quote basket.`, picks.length ? `My pick for you: ${picks.join(' and ')}.` : '', 'Happy to walk you through them. Which one feels most like you?', '', state.agency || ''].filter((l, i, a) => l || (a[i - 1] && a[i + 1] !== undefined)).join('\n').trim();
+  return [`Hi ${p.name} team,`, '', `I rebuilt ${p.host} as five fresh website concepts, using your real products and branding. Each one has five pages, works on phones, and includes dark mode, product search and a quote basket.`, picks.length ? `My pick for you: ${picks.join(' and ')}.` : '', state.shareUrl ? `Take a look here (private link, open for 48 hours): ${state.shareUrl}` : '', 'Happy to walk you through them. Which one feels most like you?', '', state.agency || ''].filter((l, i, a) => l || (a[i - 1] && a[i + 1] !== undefined)).join('\n').trim();
 }
 function openPitch() { if (!state.profile) return; $('#pitchText').value = pitchNote(); $('#pitchDlg').showModal(); setStep(4); }
 async function copyPitch() {
@@ -264,6 +286,31 @@ function boot() {
   say('Paste a website or pick a lead. I will build five concepts from the real site.');
   say('Tip: type <b>dark</b> or <b>light</b> to flip every preview.');
   state.leadsReady = loadLeads();
-  fetch('/api/config').then(r => r.json()).catch(() => ({}));
 }
-renderGate(); route();
+
+/* ---------------- share with client (private link, 48 hours) ---------------- */
+async function openShare() {
+  if (!state.profile) return;
+  const dlg = $('#shareDlg'); $('#shareState').textContent = 'Creating a private link'; $('#shareBox').hidden = true; $('#shareErr').textContent = ''; dlg.showModal();
+  try {
+    if (!state.shareUrl || state.shareExp < Date.now() + 60_000) {
+      const r = await fetch('/api/share', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ profile: state.profile, agency: state.agency }) });
+      if (r.status === 401) { dlg.close(); expired(); return; }
+      const j = await r.json().catch(() => ({})); if (!r.ok || !j.ok) throw new Error(j.error || 'Could not create the link');
+      state.shareUrl = `${location.origin}/s/${j.token}`; state.shareExp = j.expiresAt;
+    }
+    $('#shareLink').value = state.shareUrl; $('#shareBox').hidden = false;
+    $('#shareState').textContent = `Ready. Valid for 48 hours, until ${new Date(state.shareExp).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}.`;
+  } catch (e) { $('#shareState').textContent = ''; $('#shareErr').textContent = e.message; }
+}
+$('#shareBtn').onclick = openShare;
+$('#shareCopy').onclick = async () => { const v = $('#shareLink').value; try { await navigator.clipboard.writeText(v); } catch { $('#shareLink').select(); try { document.execCommand('copy'); } catch { /* ignore */ } } toast('Link copied'); };
+$('#shareNew').onclick = () => { state.shareUrl = null; openShare(); };
+
+/* ---------------- start: who is this? ---------------- */
+async function init() {
+  const me = await fetch('/api/me').then(r => r.json()).catch(() => ({}));
+  if (me.authed) { enterApp(me.user); return; }
+  showLogin(me.configured === false ? 'Login is not set up on this server yet. Add the WDG_AUTH setting in the hosting dashboard, then reload.' : '');
+}
+init();

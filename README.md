@@ -1,81 +1,81 @@
-# Design Generator V2
+# Design Generator V3
 
-Pick an industry, paste a company website, and get **five distinct, mobile-ready, five-page redesign concepts** built from that company's real content. Built to pitch electronics and hardware companies with "here is your site, redesigned".
+Log in, pick an industry, paste a company website, and get **five distinct, mobile-ready, five-page redesign concepts** built from that company's real content. Share them with the client through a private link that stops working after 48 hours.
 
 ```
-industry → website or lead → /api/analyze reads the live site → profile → 5 template engines → previews
+login → industry → website or lead → /api/analyze reads the live site → profile → 5 designs → share link
 ```
 
-## What is new in V2
+## What V3 adds
 
-- **Industry picker first.** The generator opens by asking which industry you are designing for. Electronics is live. Manufacturing, Healthcare, Real estate, Logistics and Software are placeholders.
-- **Five genuinely different designs**, each with its own fonts, navigation pattern and page layouts (table below).
-- **Every design is a five-page site** (home, catalogue, sectors, company, contact) with working navigation, a real contact form and a quote basket.
-- **Copy engine.** One short, witty, action-driving voice. No em or en dashes anywhere, no walls of text, no repeated lines. Tests enforce all three.
-- **Smoother scrolling.** One batched scroll loop, no per-scroll style invalidation, no full-page blur or blend effects. Previews stay calm until hovered.
-- **Back to the generator, always.** Full-screen view has its own URL, so the browser Back button works. Tabs opened from the generator carry a "Back to Design Generator" pill.
-- **Pitch tools.** Star your favourites, then copy a ready-to-send pitch note. Loading skeletons, mobile layout, stepper.
+- **Login.** Only people with a username and password can open the generator, scrape sites or see the lead list. Passwords are never stored: only salted scrypt hashes, in one server-side setting.
+- **Private client links.** "Share with client" creates a link that shows only the five designs, needs no login, and expires after **48 hours**. Clients can explore and switch themes and devices, but cannot edit or download.
+- **Full homepages.** Each design rebuilds the original site's own sections (cards, story, logos, testimonials) after the hero, then products, stats and the quote steps. Sites that expose little still get a full page.
+- **Much better product capture.** The crawler uses Shopify and WooCommerce APIs, listing pages, pagination, category pages, the sitemap and product detail pages, inside an 18 second budget. Menu pages and "what we make" sections are the fallback when a site has no product grid.
+- **Navigation.** Every step (Industry, Website, Compare, Pitch) is a button. Your results are kept when you go back to the Website step.
+
+## Set up login (required, one minute)
+
+The repo is public, so it contains **no passwords and no secrets**. Everything lives in one environment variable, `WDG_AUTH`.
+
+```bash
+node scripts/make-auth.mjs "Samarpan:their-password" "Chirag:their-password"
+```
+
+It prints a JSON value (salted hashes plus a random signing secret). In Vercel go to **Settings, Environment Variables**, add `WDG_AUTH` with that value, then **Redeploy**. Until it is set the generator stays locked and the login page says so. To add or change a user, run the script again and replace the variable. Changing the value signs everyone out.
+
+## Share links
+
+- Default: a signed link that carries the designs inside it. Nothing is stored, so it works with no extra setup. The signature enforces the 48 hour expiry.
+- Optional short links: add Vercel KV or Upstash Redis (`KV_REST_API_URL` and `KV_REST_API_TOKEN`). Links become `/s/<short id>` and the data expires in Redis after 48 hours.
+
+Shared pages are marked `noindex`, are never cached, and send no referrer.
 
 ## The five designs
 
-| Design | Look | Fonts | Navigation | Signature |
-|---|---|---|---|---|
-| **Circuit Noir** | Dark tech | Space Grotesk, JetBrains Mono | Top bar | Live circuit canvas, drag rail, Ctrl K command palette |
-| **Bento Lab** | Warm cream, editorial | DM Serif Display, DM Sans | Floating pill | Bento tiles, scroll-tilting hero, masonry catalogue |
-| **Blueprint** | Engineering sheet | Barlow Condensed, IBM Plex Mono | Left sheet index | Self-drawing schematic, table catalogue, RFQ form, crosshair |
-| **Aurora Glass** | Soft futurism | Sora | Bottom dock | Pinned scroll story, glass cards, gradient glow |
-| **Kinetic** | Loud editorial | Bricolage Grotesque, Instrument Serif | Full-screen menu | Giant type, velocity marquee, hover-preview index |
+| Design | Look | Navigation | Signature |
+|---|---|---|---|
+| **Circuit Noir** | Dark tech | Top bar | Live circuit canvas, drag rail, Ctrl K search |
+| **Bento Lab** | Warm cream, serif | Floating pill | Bento tiles, masonry catalogue |
+| **Blueprint** | Engineering sheet | Left sheet index | Self-drawing schematic, table catalogue, RFQ form |
+| **Aurora Glass** | Soft futurism | Bottom dock | Pinned scroll story, glass cards |
+| **Kinetic** | Loud editorial | Full-screen menu | Giant type, hover-preview index |
 
-All five have dark and light mode, scroll reveals, hover effects, product search and a quote basket that opens the visitor's email app addressed to the company.
-
-## Using it
-
-1. Choose **Electronics and hardware**.
-2. Type a URL (`temple-emc.com`), a company name from your leads, or click a lead card.
-3. Five live previews appear. Hover one to wake it up, or tap "Tap to scroll it". **Full screen** opens present mode (desktop, tablet, phone, dark, light, arrow keys).
-4. Star favourites, **Copy pitch note**, then **Download** the HTML files to send.
-5. **Edit details** fixes anything the scraper missed and updates all five at once.
+All five have dark and light mode, five pages, product search and a quote basket that opens the visitor's email app addressed to the company. Copy follows one short, witty voice with no em dashes and no repeated lines, enforced by tests.
 
 ## Run locally
 
 ```bash
 npm install
-npm start      # http://localhost:3000
-npm test       # extractor, copy rules, template safety
+node scripts/make-auth.mjs "You:a-password"   # also writes data/wdg-auth.json (git-ignored)
+npm start                                      # http://localhost:3000
+npm test
+node scripts/e2e.mjs                           # drives the real UI with throwaway test credentials
 ```
 
-`data/leads.csv` (git-ignored) feeds `npm run leads`, which writes `public/leads.json` (company, website, city only).
+`data/leads.csv` (git-ignored) feeds `npm run leads`, which writes `lib/leads-data.js` (company, website and city only). The lead list is served only to logged-in users.
 
 ## Deploy
 
-Static frontend plus one stateless function, so it runs anywhere.
+Static frontend plus stateless functions (`api/`). On Vercel, import the repo and set `WDG_AUTH`. On Render, Railway, Fly or a VPS use `npm start` (Node 20 or newer) or the `Dockerfile`, with `WDG_AUTH` set.
 
-- **Vercel:** import the repo. `vercel.json` forces the static preset; `api/` holds the functions.
-- **Render, Railway, Fly, VPS:** `npm start` (Node 20 or newer) or the included `Dockerfile`. The entry file is `local-server.js`.
-
-| Variable | Purpose |
-|---|---|
-| `ACCESS_KEY` | Recommended. If set, the API requires this key and the UI asks for it once per session. The variable name must be exactly `ACCESS_KEY`. |
-| `PORT` | Node server port (default 3000) |
-
-Protections: SSRF guard (private and metadata addresses blocked, re-checked on every redirect), 12 s timeout, 2.5 MB cap, per-IP rate limit, HTML escaping and URL allow-listing, previews in sandboxed iframes.
+Protections: server-verified login, HttpOnly SameSite session cookie (12 hours), login rate limit, constant-time checks, JSON-only POSTs with origin checks, SSRF guard on the scraper, response caps, HTML escaping and URL allow-listing, sandboxed previews.
 
 ## Limits
 
-- Sites that build pages entirely with JavaScript expose little HTML. The chat says so and Edit details fills the gaps.
+- The design engine runs in the browser, so someone who is not logged in can read the template code. They still cannot scrape sites or see leads, which need a session.
+- Sites that build their pages entirely with JavaScript expose little HTML. The chat says so and Edit details fills the gaps.
 - Product photos are hot-linked. A site that blocks hot-linking falls back to generated artwork.
-- Copy is written to be accurate and generic: it never invents numbers, awards or claims. Stats come from the site or are counts of what was found.
-- When fewer than six real products are found, placeholder names are used and the chat flags it.
+- Copy never invents numbers, awards or claims. Stats come from the site or are counts of what was found.
+- A signed share link cannot be revoked early (use KV short links for that); it simply expires.
 
 ## Layout
 
 ```
-public/            frontend (industry gate, chat, previews, present mode)
-  engine/          copy.js (voice), common.js (model + shell), runtime.js (router, scroll, quote basket), t1 to t5 (designs)
-lib/               extractor, safe fetcher, colour utils, API handler
+public/            frontend (login, industry, chat, previews, share page)
+  engine/          copy.js (voice), common.js (model + shell + sections), runtime.js, t1 to t5 (designs)
+lib/               auth, share, handler, extractor (extract, products, sections), safe fetcher
 api/               Vercel functions       local-server.js  plain Node server
-scripts/           build-leads, shoot (screenshots + overflow), e2e, live-test, live-e2e
-test/              unit tests + fixture
+scripts/           make-auth, build-leads, shoot, e2e, live-test, probe
+test/              unit tests + fixtures
 ```
-
-Add a sixth design: copy any `public/engine/tN-*.js`, give it a new voice index in `copy.js`, and register it in `public/engine/index.js`. Add an industry by adding it to `INDUSTRIES` in `public/app.js` once it has its own leads and copy.

@@ -12,16 +12,30 @@
 </head>
 <body>
 <header class="top">
-  <a class="brand" href="#/" aria-label="Design Generator home"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16l5-8 4 6 3-4 6 6"/></svg></span><b>Design Generator</b><em class="ver">V2</em></a>
+  <a class="brand" href="#/" aria-label="Design Generator home"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16l5-8 4 6 3-4 6 6"/></svg></span><b>Design Generator</b><em class="ver">V3</em></a>
   <ol class="steps" id="steps" aria-label="Progress">
     <li data-s="1"><button type="button"><i>1</i><span>Industry</span></button></li><li data-s="2"><button type="button"><i>2</i><span>Website</span></button></li><li data-s="3"><button type="button"><i>3</i><span>Compare</span></button></li><li data-s="4"><button type="button"><i>4</i><span>Pitch</span></button></li>
   </ol>
+  <div class="who" id="who" hidden><span class="who-name" id="whoName"></span><button class="ghost" id="logout" type="button">Log out</button></div>
   <div class="top-actions" id="topActions" hidden>
     <a class="ghost" href="#/" id="changeInd">Change industry</a>
     <div class="seg" id="themeSeg" role="group" aria-label="Preview theme"><button data-t="auto" class="on">Auto</button><button data-t="dark">Dark</button><button data-t="light">Light</button></div>
     <button class="ghost" id="editBtn" disabled>Edit details</button>
   </div>
 </header>
+
+<!-- Log in -->
+<main class="login" id="login" hidden>
+  <form class="login-card" id="loginForm" autocomplete="on">
+    <span class="mark big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16l5-8 4 6 3-4 6 6"/></svg></span>
+    <h1>Welcome back</h1>
+    <p class="sub">Log in to open the Design Generator.</p>
+    <label>Username<input id="loginUser" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+    <label>Password<input id="loginPass" name="password" type="password" autocomplete="current-password" required></label>
+    <p class="login-msg" id="loginMsg" role="alert"></p>
+    <button class="primary wide" id="loginGo" type="submit">Log in</button>
+  </form>
+</main>
 
 <!-- Step 1: industry -->
 <main class="gate" id="gate">
@@ -57,7 +71,7 @@
     </div>
     <div class="results" id="results" hidden>
       <div class="res-head"><div><p class="eyebrow">Step 3 of 4</p><h2 id="resTitle"></h2><p id="resMeta"></p></div>
-        <div class="res-actions"><button class="ghost" id="newSite" type="button">&larr; New website</button><button class="ghost" id="pitchBtn">Pitch note</button><button class="ghost" id="dlAll">Download all 5</button></div></div>
+        <div class="res-actions"><button class="ghost" id="newSite" type="button">&larr; New website</button><button class="primary" id="shareBtn" type="button">Share with client</button><button class="ghost" id="pitchBtn">Pitch note</button><button class="ghost" id="dlAll">Download all 5</button></div></div>
       <div class="grid" id="grid"></div>
     </div>
   </section>
@@ -84,8 +98,16 @@
   <div class="two"><label>Email<input name="email"></label><label>Phone<input name="phone"></label></div>
   <div class="dlg-actions"><button value="cancel" class="ghost">Cancel</button><button value="ok" class="primary">Apply</button></div>
 </form></dialog>
+<dialog id="shareDlg"><form method="dialog" class="edit">
+  <h3>Share with your client</h3>
+  <p class="hint">A private link to these five designs. It works for 48 hours, then stops. Your client can view and explore them, but cannot edit or download anything.</p>
+  <p id="shareState" class="share-state" aria-live="polite"></p>
+  <p id="shareErr" class="login-msg" role="alert"></p>
+  <div id="shareBox" hidden><input id="shareLink" readonly aria-label="Private share link"></div>
+  <div class="dlg-actions"><button value="close" class="ghost">Close</button><button type="button" class="ghost" id="shareNew">New link</button><button type="button" class="primary" id="shareCopy">Copy link</button></div>
+</form></dialog>
 <dialog id="pitchDlg"><form method="dialog" class="edit">
-  <h3>Your pitch note</h3><p class="hint">Short, friendly and ready to send. Starred designs are mentioned by name.</p>
+  <h3>Your pitch note</h3><p class="hint">Short, friendly and ready to send. Starred designs are named. Create a share link first and it is added.</p>
   <textarea id="pitchText" rows="9" readonly></textarea>
   <div class="dlg-actions"><button value="close" class="ghost">Close</button><button type="button" class="ghost" id="pitchDl">Download all 5</button><button type="button" class="primary" id="pitchCopy">Copy note</button></div>
 </form></dialog>

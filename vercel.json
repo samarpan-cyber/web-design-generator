@@ -3,5 +3,11 @@
   "buildCommand": null,
   "installCommand": "npm install",
   "outputDirectory": "public",
-  "functions": { "api/*.js": { "maxDuration": 30 } }
+  "functions": { "api/*.js": { "maxDuration": 30 } },
+  "rewrites": [{ "source": "/s/:token", "destination": "/share.html" }],
+  "headers": [
+    { "source": "/s/:token", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }, { "key": "Referrer-Policy", "value": "no-referrer" }, { "key": "Cache-Control", "value": "no-store" }] },
+    { "source": "/share.html", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }, { "key": "Referrer-Policy", "value": "no-referrer" }, { "key": "Cache-Control", "value": "no-store" }] },
+    { "source": "/api/(.*)", "headers": [{ "key": "Cache-Control", "value": "no-store" }] }
+  ]
 }
