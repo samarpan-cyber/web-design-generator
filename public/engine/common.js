@@ -117,7 +117,7 @@ export function buildModel(p, opts = {}) {
   // images: the prospect's own good photos first, then stock photography for the gaps, procedural art only if a stock photo fails to load
   const ind = p.industry || 'electronics';
   const own = [...new Map([[safeUrl(p.ogImage), { src: safeUrl(p.ogImage), w: 1200 }], ...(p.images || []).filter(goodPhoto).map(i => [safeUrl(i.src), { src: safeUrl(i.src), w: i.w || 0, alt: i.alt }])]).values()].filter(i => i.src);
-  const stock = stockPhotos(ind, (p.host || name) + (opts.photoSeed || ''), opts.assetBase || undefined);
+  const stock = stockPhotos(ind, (p.host || name) + (opts.photoSeed || ''), opts.assetBase || undefined, (p.industryInfo && p.industryInfo.segment) || '');
   let si = 0;
   const slot = (k, label) => {
     const a = art((p.host || name) + k, brand, label || 'module sensor chip');

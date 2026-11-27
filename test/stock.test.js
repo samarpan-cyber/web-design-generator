@@ -12,7 +12,7 @@ test('every stock file exists, is a modest size and has a small twin', () => {
     const f = new URL(`../public/stock/${ind}-${k}-${t}.jpg`, import.meta.url); const sz = fs.statSync(f).size;
     assert.ok(sz > 15_000 && sz < (t === 'l' ? 400_000 : 150_000), `${ind}-${k}-${t} ${sz}`);
   }
-  assert.deepEqual(stockIndustries.sort(), Object.keys(counts).sort());
+  assert.deepEqual(stockIndustries.slice().sort(), [...Object.keys(counts), 'realestate'].sort());
 });
 test('stock order is stable per site and different between sites', () => {
   const a = stockPhotos('dentists', 'a.test').map(x => x.src), b = stockPhotos('dentists', 'a.test').map(x => x.src), c = stockPhotos('dentists', 'zzz.test').map(x => x.src);

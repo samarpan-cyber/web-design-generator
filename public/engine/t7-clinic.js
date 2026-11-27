@@ -41,7 +41,7 @@ function model(profile, opts, v) {
   const services = [...found.slice(0, 10)]; for (const d of defaults) { if (services.length >= 8) break; if (!seen.has(d.name.toLowerCase())) { seen.add(d.name.toLowerCase()); services.push(d); } }
   const usedDesc = new Set(); for (const s of services) { if (!s.desc || usedDesc.has(s.desc.toLowerCase())) { const dd = defaults.find(d => d.name === s.name); s.desc = dd ? dd.desc : `Ask the clinic about ${s.name.toLowerCase()}.`; } usedDesc.add(s.desc.toLowerCase()); }
   const own = [...new Set([safeUrl(p.ogImage), ...(p.images || []).filter(goodPhoto).map(i => safeUrl(i.src))].filter(Boolean))];
-  const stock = stockPhotos(industry, (p.host || name) + (opts.photoSeed || ''), opts.assetBase || undefined); // the prospect's own photos first, stock only fills the gaps
+  const stock = stockPhotos(industry, (p.host || name) + (opts.photoSeed || ''), opts.assetBase || undefined, (p.industryInfo && p.industryInfo.segment) || ''); // the prospect's own photos first, stock only fills the gaps
   const gallery = [0, 1, 2, 3].map(k => own[k] || (stock[k] && stock[k].src) || '');
   const raw = clean(p.description || p.about || '').replace(/\bDr\.\s+/g, 'Dr '); const sub = brief(raw, 140); const aboutSrc = brief(clean(p.about || '').replace(/\bDr\.\s+/g, 'Dr '), 220);
   let aboutLine = aboutSrc && aboutSrc !== sub ? aboutSrc : ''; if (!aboutLine && raw) { const s2 = (raw.match(/[^.!?]+[.!?]+/g) || [])[1]; if (s2) aboutLine = brief(s2.trim(), 220); }

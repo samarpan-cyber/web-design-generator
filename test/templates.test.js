@@ -38,7 +38,7 @@ for (const t of TEMPLATES) {
       assert.ok(html.startsWith('<!doctype html>'));
       assert.ok($('[data-page]').length >= 5, 'at least 5 pages');
       assert.ok($('a[data-go]').length >= 5, 'navigation present');
-      assert.equal($('html').attr('data-theme'), t.lightOnly ? 'light' : theme);
+      assert.equal($('html').attr('data-theme'), t.lightOnly ? t.defaultTheme : theme);
       assert.ok(!/undefined|NaN|\[object/.test(visible(html).text()), 'no undefined/NaN leaks');
     });
   }
