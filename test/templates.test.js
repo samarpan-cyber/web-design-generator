@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import * as cheerio from 'cheerio';
-import { TEMPLATES } from '../public/engine/index.js';
+import { LIBRARY as TEMPLATES } from '../public/engine/index.js';
 import { extractProfile } from '../lib/extract.js';
 import { brief, noDash } from '../public/engine/copy.js';
 
@@ -38,7 +38,7 @@ for (const t of TEMPLATES) {
       assert.ok(html.startsWith('<!doctype html>'));
       assert.ok($('[data-page]').length >= 5, 'at least 5 pages');
       assert.ok($('a[data-go]').length >= 5, 'navigation present');
-      assert.equal($('html').attr('data-theme'), theme);
+      assert.equal($('html').attr('data-theme'), t.family === 'classic' ? 'light' : theme);
       assert.ok(!/undefined|NaN|\[object/.test(visible(html).text()), 'no undefined/NaN leaks');
     });
   }
@@ -86,8 +86,8 @@ for (const t of TEMPLATES) {
   });
 }
 
-test('the five designs use five different font stacks and nav patterns', () => {
-  const sig = TEMPLATES.map(t => { const h = t.render(fixture, {}); return { fonts: (h.match(/family=([^&:]+)/g) || []).join(','), tpl: (h.match(/data-tpl="(\w+)"/) || [])[1] }; });
+test('every design in the library uses different font stacks and nav patterns', () => {
+  const sig = TEMPLATES.map(t => { const h = t.render(fixture, {}); return { fonts: (h.match(/family=[^"']+/g) || []).join(','), tpl: (h.match(/data-tpl="([\w-]+)"/) || [])[1] }; });
   assert.equal(new Set(sig.map(s => s.fonts)).size, TEMPLATES.length, 'unique font combos');
   assert.equal(new Set(sig.map(s => s.tpl)).size, TEMPLATES.length);
 });

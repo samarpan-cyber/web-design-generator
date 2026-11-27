@@ -189,8 +189,88 @@ export function voiceCopy(voice, m, topic) {
       foot: 'Built right. Shipped on time. Mostly.', navCta: 'Quote', pill: 'Menu'
     }
   ];
+  if (voice >= 5) return classicVoice(voice - 5, m, topic, V[1]);
   return V[voice % V.length];
 }
 
-export function headline(topic, voice) { return HEAD[topic][voice % 5]; }
+
+/* ---------- classic family: plain, conventional business copy, as a normal WordPress site would read ---------- */
+const CHEAD = {
+  power: ['Reliable power solutions for every application', 'Dependable power equipment for demanding sites', 'Power systems built for steady performance', 'Your partner for dependable power'],
+  iot: ['Smart connected solutions for modern business', 'Connected devices that simply work', 'Practical IoT for real-world operations', 'Smarter monitoring, simpler operations'],
+  pcb: ['Quality PCB assembly and electronics manufacturing', 'From prototype to production, done right', 'Electronics manufacturing you can rely on', 'Careful assembly, consistent quality'],
+  test: ['Accurate test and measurement solutions', 'Precision instruments for confident results', 'Measurement tools your team can trust', 'Reliable testing from bench to field'],
+  components: ['Quality electronic components, supplied with care', 'The components you need, when you need them', 'A dependable source for electronic parts', 'Genuine parts and helpful service'],
+  auto: ['Motor control and drive solutions that perform', 'Drives and controllers built for the job', 'Efficient motion control for industry', 'Smooth, dependable drive systems'],
+  rf: ['Reliable wireless and network solutions', 'Clear connections for growing businesses', 'Wireless hardware with solid performance', 'Networking solutions built to last'],
+  lighting: ['Efficient lighting for homes and industry', 'Quality lighting that saves energy', 'Lighting solutions made to last', 'Bright, reliable and efficient'],
+  automation: ['Industrial automation that keeps you running', 'Control solutions for smarter plants', 'Automation built around your process', 'Practical automation for real factories'],
+  general: ['Quality electronics for your business', 'Your trusted partner in electronics', 'Dependable products and honest service', 'Electronics solutions that deliver']
+};
+const CLASSIC = [
+  { // 0 corporate
+    nav: { home: 'Home', about: 'About Us', products: 'Products', industries: 'Industries', contact: 'Contact Us' },
+    kicker: n => `Welcome to ${n}`, ctaA: 'Get a Free Quote', ctaB: 'Our Products',
+    aboutK: 'About Us', aboutT: 'Committed to quality and service', offerK: 'What We Offer', offerT: 'Solutions for every requirement', offerS: 'A closer look at what we do best.',
+    prodK: 'Our Products', prodT: 'Explore our product range', prodS: 'Pick what you need and add it to your quote.',
+    whyK: 'Why Choose Us', whyT: 'Reasons customers stay with us', stepsK: 'How It Works', stepsT: 'Getting a quote is easy',
+    steps: [['Choose', 'Pick the products you need.'], ['Tell us', 'Share quantity and delivery date.'], ['Receive', 'We send a clear quotation.']],
+    secK: 'Industries', secT: 'Industries we serve', secS: 'Where our products are put to work.',
+    testiK: 'Testimonials', testiT: 'What our customers say', clientsK: 'Our Clients', clientsT: 'Companies we work with',
+    bandT: 'Need a quotation?', bandS: 'Tell us what you need and we will respond.', bandBtn: 'Request a Quote',
+    contactK: 'Contact Us', contactT: 'Get in touch', contactS: 'Send us a message and we will get back to you.', formT: 'Send a message', foot: 'Quality products and dependable service.'
+  },
+  { // 1 industrial
+    nav: { home: 'Home', about: 'Company', products: 'Products', industries: 'Sectors', contact: 'Contact' },
+    kicker: n => n, ctaA: 'Request a Quote', ctaB: 'View Products',
+    aboutK: 'Who We Are', aboutT: 'Built on engineering and trust', offerK: 'What We Do', offerT: 'Capabilities at a glance', offerS: 'The work we are known for.',
+    prodK: 'Product Range', prodT: 'Our products', prodS: 'Select items and send one enquiry.',
+    whyK: 'The Difference', whyT: 'What you can expect from us', stepsK: 'Our Process', stepsT: 'From enquiry to delivery',
+    steps: [['Enquire', 'Send us your requirement.'], ['Review', 'We confirm the specification.'], ['Deliver', 'Your order is prepared and dispatched.']],
+    secK: 'Sectors', secT: 'Sectors we support', secS: 'Applications across industry.',
+    testiK: 'Feedback', testiT: 'Customer feedback', clientsK: 'Customers', clientsT: 'Our customers',
+    bandT: 'Have a requirement?', bandS: 'Our team will get back to you shortly.', bandBtn: 'Send Enquiry',
+    contactK: 'Contact', contactT: 'Talk to our team', contactS: 'Tell us about your requirement.', formT: 'Enquiry form', foot: 'Engineering you can count on.'
+  },
+  { // 2 catalog
+    nav: { home: 'Home', about: 'About', products: 'Shop', industries: 'Applications', contact: 'Contact' },
+    kicker: n => `${n} online`, ctaA: 'Browse Products', ctaB: 'Request Pricing',
+    aboutK: 'Our Story', aboutT: 'A supplier you can rely on', offerK: 'Shop by Category', offerT: 'Find what you need', offerS: 'Browse our main categories.',
+    prodK: 'Featured Products', prodT: 'Popular picks', prodS: 'Add items to your quote list.',
+    whyK: 'Why Buy From Us', whyT: 'A better way to buy', stepsK: 'Ordering', stepsT: 'Ordering is simple',
+    steps: [['Browse', 'Look through the catalogue.'], ['Add to list', 'Save the items you like.'], ['Get pricing', 'We reply with your quotation.']],
+    secK: 'Applications', secT: 'Where our products are used', secS: 'Common uses across industry.',
+    testiK: 'Reviews', testiT: 'Customer reviews', clientsK: 'Brands', clientsT: 'Brands we supply',
+    bandT: 'Looking for something specific?', bandS: 'Ask us. We can help you find it.', bandBtn: 'Ask Us',
+    contactK: 'Help', contactT: 'We are here to help', contactS: 'Ask about products, pricing or delivery.', formT: 'Ask a question', foot: 'Browse, choose and ask for pricing.'
+  },
+  { // 3 modern business
+    nav: { home: 'Home', about: 'About', products: 'Solutions', industries: 'Industries', contact: 'Contact' },
+    kicker: n => `${n}`, ctaA: 'Get Started', ctaB: 'See What We Do',
+    aboutK: 'About Us', aboutT: 'A team that cares about your success', offerK: 'Our Services', offerT: 'How we can help', offerS: 'Practical help for your business.',
+    prodK: 'Our Solutions', prodT: 'Products and solutions', prodS: 'Tell us which ones you want to know more about.',
+    whyK: 'Why Us', whyT: 'What sets us apart', stepsK: 'Working Together', stepsT: 'How we work together',
+    steps: [['Talk', 'We listen to what you need.'], ['Plan', 'We suggest the right solution.'], ['Deliver', 'We follow through until it works.']],
+    secK: 'Who We Help', secT: 'Industries we help', secS: 'Teams that rely on us.',
+    testiK: 'Kind Words', testiT: 'Clients love working with us', clientsK: 'Partners', clientsT: 'Partners and clients',
+    bandT: 'Ready to get started?', bandS: 'Let us talk about what you need.', bandBtn: 'Contact Us',
+    contactK: 'Say Hello', contactT: 'Let us talk', contactS: 'We would love to hear from you.', formT: 'Drop us a line', foot: 'Good work and honest advice.'
+  }
+];
+export function classicVoice(variant, m, topic, base) {
+  const c = CLASSIC[variant % CLASSIC.length];
+  return {
+    ...base, classic: c, nav: c.nav,
+    eyebrow: c.kicker(m.name), ctaA: c.ctaA, ctaB: c.ctaB,
+    kinds: { cards: c.offerK, split: c.aboutK, list: c.whyK, steps: c.stepsK, logos: c.clientsK, quotes: c.testiK, text: c.aboutK },
+    kf: (n, l) => l, homeSectors: c.secK, homeCerts: c.whyK,
+    stepsTitle: c.stepsT, steps: c.steps,
+    prodTitle: c.prodT, prodSub: c.prodS, solTitle: c.secT, solSub: c.secS,
+    aboutTitle: c.aboutT, aboutSub: c.aboutK, factsTitle: c.contactK, certsTitle: c.whyK,
+    contactTitle: c.contactT, contactSub: c.contactS, send: c.formT === 'Enquiry form' ? 'Send Enquiry' : 'Send Message', direct: c.contactK,
+    bandTitle: c.bandT, bandSub: c.bandS, bandCta: c.bandBtn, foot: c.foot, navCta: c.ctaA.replace('Get a Free ', 'Get a '), add: 'Add to quote', details: 'View details', search: 'Search products', empty: 'No products match your search.'
+  };
+}
+
+export function headline(topic, voice) { return voice >= 5 ? CHEAD[topic][(voice - 5) % 4] : HEAD[topic][voice % 5]; }
 export function subline(m, topic) { return brief(m.rawDesc || '', 130) || SUB[topic]; }

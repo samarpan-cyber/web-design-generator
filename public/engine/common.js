@@ -151,7 +151,7 @@ export function buildModel(p, opts = {}) {
   Object.assign(m, {
     certs: (p.certifications || []).slice(0, 6), logo: safeUrl(p.logo), favicon: safeUrl(p.favicon),
     email: (c.emails || [])[0] || '', phone: (c.phones || [])[0] || '', address: clean(c.address || ''), social: p.social || {},
-    host: p.host || '', site: safeUrl(p.url), agency: opts.agency || '', back: opts.back || '', paused: !!opts.paused,
+    host: p.host || '', site: safeUrl(p.url), agency: opts.agency || '', designer: normDesigner(opts.designer, opts.agency), back: opts.back || '', paused: !!opts.paused,
     theme: opts.theme || 'dark', year: new Date().getFullYear(), placeholders, opts
   });
   m.hs = buildHomeSections(p, m);
@@ -230,6 +230,27 @@ export function sectionsHtml(m) {
   }).join('');
 }
 
+
+/** Who designed this: shown on every preview so the client knows who to call. Nothing is invented: empty fields are simply hidden. */
+export function normDesigner(d, agency) {
+  d = d && typeof d === 'object' ? d : {};
+  const phone = noDash(String(d.phone || '')).slice(0, 30);
+  const wa = String(d.whatsapp || d.phone || '').replace(/[^\d]/g, '').slice(0, 15);
+  return {
+    company: noDash(String(d.company || agency || 'Digifyo')).slice(0, 40) || 'Digifyo',
+    name: noDash(String(d.name || '')).slice(0, 60),
+    role: noDash(String(d.role || '')).slice(0, 60),
+    phone, whatsapp: wa, email: /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(d.email || '') ? String(d.email).slice(0, 90) : '',
+    site: /^https?:\/\//i.test(d.site || '') ? String(d.site).slice(0, 120) : ''
+  };
+}
+export function designerCard(dz, cls = 'by-card') {
+  const call = dz.phone ? `<a href="tel:${esc(dz.phone.replace(/[^+\d]/g, ''))}">Call ${esc(dz.phone)}</a>` : '';
+  const wa = dz.whatsapp ? `<a href="https://wa.me/${esc(dz.whatsapp)}" target="_blank" rel="noopener">WhatsApp</a>` : '';
+  const em = dz.email ? `<a href="mailto:${esc(dz.email)}">${esc(dz.email)}</a>` : '';
+  return `<div class="${cls}"><b>${esc(dz.name || dz.company)}</b><span>${esc(dz.role ? dz.role + ', ' : '')}${esc(dz.company)}</span>${call}${wa}${em}</div>`;
+}
+
 /* ---------------- page shell ---------------- */
 export const BASE_CSS = `
 *,*::before,*::after{box-sizing:border-box}html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}body{margin:0;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;overflow-x:hidden;min-width:320px}
@@ -267,6 +288,8 @@ html.paused :is(.amb,.amb *){animation-play-state:paused!important}
 .wq-form{display:grid;gap:10px}.wq-form input,.wq-form textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit;font-size:16px}.wq-send{padding:14px;border:0;border-radius:12px;background:var(--brand);color:var(--brand-ink);font-weight:700}.wq-done{color:var(--brand);font-size:14px}
 [data-quote-count]{display:none;min-width:20px;height:20px;border-radius:10px;background:var(--brand);color:var(--brand-ink);font:700 11px/20px system-ui;text-align:center;padding:0 5px}[data-quote-count].on{display:inline-block}
 .wdg-dock{position:fixed;left:12px;bottom:var(--flag-bottom,12px);z-index:150;display:flex;gap:8px;flex-wrap:wrap;max-width:calc(100vw - 24px)}
+.wdg-by{position:relative;font:600 11px/1 system-ui}.wdg-by summary{list-style:none;cursor:pointer;padding:9px 12px;border-radius:99px;background:var(--wdg-by-bg,#101418);color:var(--wdg-by-fg,#fff);white-space:nowrap;letter-spacing:.03em;box-shadow:0 4px 18px rgba(0,0,0,.25)}.wdg-by summary::-webkit-details-marker{display:none}
+.by-card{position:absolute;left:0;bottom:calc(100% + 8px);min-width:230px;display:grid;gap:6px;padding:14px;border-radius:14px;background:#101418;color:#fff;box-shadow:0 18px 50px rgba(0,0,0,.4);font:500 13px/1.4 system-ui}.by-card b{font-size:15px}.by-card span{opacity:.7}.by-card a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.1);word-break:break-all}.by-card a:hover{background:rgba(255,255,255,.2)}
 .wdg-dock a{font:600 11px/1 system-ui;letter-spacing:.03em;padding:9px 12px;border-radius:99px;background:var(--fg);color:var(--bg);text-decoration:none;opacity:.92;white-space:nowrap}.wdg-dock a:hover{opacity:1}
 .menu-btn{display:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);place-items:center;padding:0}.menu-btn span{display:block;width:18px;height:2px;background:var(--fg);box-shadow:0 6px 0 var(--fg);transform:translateY(-3px)}
 .mnav{position:fixed;inset:0;background:var(--bg);z-index:90;display:none;flex-direction:column;justify-content:center;align-items:center;gap:18px;font-size:32px;font-weight:700;padding:80px 24px 40px;overflow:auto}.mnav a{text-decoration:none;padding:6px 14px}html.menu-open .mnav{display:flex}html.menu-open{overflow:hidden}
@@ -292,7 +315,7 @@ export function shell(m, { tpl, fonts, css, header = '', footer = '', pages, scr
   const labels = Object.fromEntries(pages.map(p => [p.id, p.label]));
   const cfg = { name: m.name, email: m.email, labels, paused: m.paused, t: { send: m.t.send, added: 'Added', qTitle: m.t.navCta === 'RFQ' ? 'RFQ list' : 'Your quote list', qSub: m.t.bandSub } };
   const fav = m.favicon || m.logo;
-  const dock = (m.back || m.agency) ? `<div class="wdg-dock">${m.back ? `<a href="${esc(m.back)}">← Back to Design Generator</a>` : ''}${m.agency ? `<a href="#/home" data-go="home">Concept by ${esc(m.agency)}</a>` : ''}</div>` : '';
+  const dz = m.designer; const dock = `<div class="wdg-dock">${m.back ? `<a class="wdg-back" href="${esc(m.back)}">\u2190 Back to Design Generator</a>` : ''}<details class="wdg-by"><summary>Designed by ${esc(dz.company)}</summary>${designerCard(dz)}</details></div>`;
   return `<!doctype html><html lang="en" data-theme="${themeDefault}" data-tpl="${tpl}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>${esc(m.name)} | ${esc(pages[0].label)}</title><meta name="description" content="${esc((m.sub || '').slice(0, 160))}">${fav ? `<link rel="icon" href="${esc(fav)}">` : ''}${fonts ? `<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="${esc(fonts)}" rel="stylesheet">` : ''}<script>document.documentElement.classList.add('js');window.__WDG=${jsonForScript(cfg)}</script><style>${BASE_CSS}\n${css}</style></head><body><div id="prog"></div>${header}<div class="mnav" data-mobile-nav>${menuLinks}</div><main id="top">${pages.map((p, i) => `<section class="page${i === 0 ? ' on' : ''}" data-page="${esc(p.id)}" aria-label="${esc(p.label)}">${p.html}</section>`).join('')}</main>${footer}${dock}<script>${script}</script><script>(${runtime.toString()})()</script></body></html>`;
 }
 
