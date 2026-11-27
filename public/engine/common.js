@@ -83,6 +83,7 @@ export function art(seed, brandHex, name = '', w = 800, h = 600) {
 const GENERIC_PRODUCTS = ['Core range', 'Custom builds', 'Engineering support', 'Embedded systems', 'Power solutions', 'Testing and service'];
 const GENERIC_SECTORS = ['Industrial equipment', 'Embedded systems', 'Power systems', 'Custom projects'];
 const clean = s => noDash(s);
+const clean0 = s => noDash(s);
 
 export function buildModel(p, opts = {}) {
   const voice = opts.voice ?? 0;
@@ -101,7 +102,7 @@ export function buildModel(p, opts = {}) {
     const have = new Set(products.map(x => x.name.toLowerCase()));
     for (const n of [...cats, ...GENERIC_PRODUCTS]) { if (products.length >= 6) break; if (!have.has(n.toLowerCase())) { have.add(n.toLowerCase()); products.push({ name: n, raw: '', url: '', img: '', placeholder: true }); placeholders++; } }
   }
-  products = products.slice(0, 12).map((x, i) => {
+  products = products.slice(0, 30).map((x, i) => {
     let desc = x.raw && x.raw.length > 24 ? brief(x.raw, 96) : '';
     if (desc && used.has(desc.toLowerCase())) desc = '';
     if (!desc) desc = describe(x.name, voice, used); else used.add(desc.toLowerCase());
@@ -153,7 +154,78 @@ export function buildModel(p, opts = {}) {
     host: p.host || '', site: safeUrl(p.url), agency: opts.agency || '', back: opts.back || '', paused: !!opts.paused,
     theme: opts.theme || 'dark', year: new Date().getFullYear(), placeholders, opts
   });
+  m.hs = buildHomeSections(p, m);
   return m;
+}
+
+/* ---------------- home sections: the site's own sections, rebuilt, then guaranteed extras ---------------- */
+const lowKey = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+const tidy = s => { s = noDash(s).replace(/[:.]+$/, '').trim(); if (s.length > 3 && s === s.toUpperCase() && /[A-Z]/.test(s)) s = s.toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase()); return s; };
+function buildHomeSections(p, m) {
+  const t = m.t, raw = Array.isArray(p.sections) ? p.sections : [];
+  const prodKeys = new Set(m.products.map(x => lowKey(x.name)));
+  const seen = new Set([m.sub, m.aboutLine, m.headline].filter(Boolean).map(lowKey));
+  const aboutKey = m.aboutLine ? lowKey(m.aboutLine) : ''; let aboutTaken = false;
+  const out = [];
+  for (const s of raw) {
+    if (out.length >= 6) break;
+    if (s.kind === 'cta') continue;
+    const heading = tidy(s.heading || '').slice(0, 64); if (!heading) continue;
+    let text = s.text ? brief(s.text, 150) : '';
+    if (text && aboutKey && lowKey(text) === aboutKey) { aboutTaken = true; seen.delete(aboutKey); }
+    if (text && seen.has(lowKey(text))) text = '';
+    if (s.kind === 'quotes') text = '';
+    const items = (s.items || []).map(i => ({ title: tidy(i.title || '').slice(0, 56), text: i.text ? brief(i.text, 100) : '', image: safeUrl(i.image), url: safeUrl(i.url) })).filter(i => i.title);
+    if (items.length >= 3 && items.filter(i => prodKeys.has(lowKey(i.title))).length / items.length >= 0.6) continue; // restates the catalogue
+    items.forEach(i => { if (i.text && seen.has(lowKey(i.text))) i.text = ''; else if (i.text) seen.add(lowKey(i.text)); });
+    if (text) seen.add(lowKey(text));
+    const bullets = (s.bullets || []).map(b => tidy(b).slice(0, 60)).filter(Boolean).slice(0, 6);
+    const logos = (s.logos || []).map(l => ({ src: safeUrl(l.src), alt: tidy(l.alt || '') })).filter(l => l.src).slice(0, 12);
+    const quotes = (s.quotes || []).map(q => ({ text: brief(q.text, 170), author: tidy(q.author || '').slice(0, 50) })).filter(q => q.text && !seen.has(lowKey(q.text)));
+    quotes.forEach(q => seen.add(lowKey(q.text)));
+    let kind = s.kind;
+    if (kind === 'cards' && items.length < 2) kind = text ? 'text' : '';
+    if (kind === 'steps' && items.length < 2) kind = '';
+    if (kind === 'split' && !text && !bullets.length && !items.length) kind = '';
+    if (kind === 'logos' && logos.length < 4) kind = '';
+    if (kind === 'quotes' && !quotes.length) kind = '';
+    if (kind === 'text' && !text) kind = '';
+    if (kind === 'list' && bullets.length < 3) kind = '';
+    if (!kind) continue;
+    const k = out.length;
+    const art0 = art((p.host || m.name) + 'hs' + k, m.brand, 'module chip pcb sensor wave'.split(' ')[k % 5]);
+    out.push({ kind, heading, text, items: items.slice(0, 6), bullets, logos, quotes, image: s.image && safeUrl(s.image) ? { src: safeUrl(s.image), art: art0, name: heading, isPhoto: true } : { src: art0, art: art0, name: heading, isPhoto: false } });
+  }
+  if (aboutTaken) { // the home page used the About paragraph, so About moves on to the next sentence (or none)
+    const rest = clean0(p.about || '').match(/[^.!?]+[.!?]+/g) || []; const nxt = rest[1] ? brief(rest[1].trim(), 200) : '';
+    m.aboutLine = nxt && !seen.has(lowKey(nxt)) ? nxt : '';
+  }
+  // guaranteed extras so the home page is never thin, even for sites that expose little
+  if (out.length < 4 && m.sectors.length >= 3 && !m.sectorsAreGeneric) out.push({ kind: 'list', heading: t.homeSectors, text: '', items: [], bullets: m.sectors.map(x => x.name).slice(0, 6), logos: [], quotes: [], image: null });
+  if (out.length < 4 && m.certs.length >= 2) out.push({ kind: 'list', heading: t.homeCerts, text: '', items: [], bullets: m.certs.slice(0, 6), logos: [], quotes: [], image: null });
+  out.push({ kind: 'steps', heading: t.stepsTitle, text: '', items: t.steps.map(([a, b]) => ({ title: a, text: b, image: '', url: '' })), bullets: [], logos: [], quotes: [], image: null });
+  out.forEach((s, i) => { s.kicker = t.kf(i + 1, t.kinds[s.kind] || t.kinds.text); });
+  return out;
+}
+
+/** The site's real sections rendered as HTML. Each design themes these with CSS variables. */
+export function sectionsHtml(m) {
+  return m.hs.map((s, i) => {
+    const showP = s.text && !(s.kind === 'text' && false);
+    const head = `<div class="hs-head"><span class="hs-k">${esc(s.kicker)}</span><h2 class="hs-t">${esc(s.heading)}</h2>${showP ? `<p class="hs-p">${esc(s.text)}</p>` : ''}</div>`;
+    let body = '';
+    if (s.kind === 'cards') body = `<div class="hs-grid">${s.items.map((it, j) => `<article class="hs-card${it.image ? '' : ' noimg'}" data-reveal data-delay="${(j % 3) * 70}">${it.image ? media({ src: it.image, art: m.img.extra.art, name: it.title, isPhoto: true }) : ''}<h3>${esc(it.title)}</h3>${it.text ? `<p>${esc(it.text)}</p>` : ''}</article>`).join('')}</div>`;
+    else if (s.kind === 'steps') body = `<div class="hs-steps">${s.items.map((it, j) => `<div class="hs-step" data-reveal data-delay="${j * 80}"><b>${j + 1}</b><h3>${esc(it.title)}</h3>${it.text ? `<p>${esc(it.text)}</p>` : ''}</div>`).join('')}</div>`;
+    else if (s.kind === 'logos') body = `<div class="hs-logos">${s.logos.map(l => `<div class="lg" data-reveal><img src="${esc(l.src)}" alt="${esc(l.alt)}" loading="lazy" onerror="this.closest('.lg').remove()"></div>`).join('')}</div>`;
+    else if (s.kind === 'quotes') body = `<div class="hs-quotes">${s.quotes.map((q, j) => `<blockquote class="hs-q" data-reveal data-delay="${j * 80}"><p>${esc(q.text)}</p>${q.author ? `<cite>${esc(q.author)}</cite>` : ''}</blockquote>`).join('')}</div>`;
+    else if (s.kind === 'list') body = `<ul class="hs-list">${s.bullets.map(b => `<li data-reveal>${esc(b)}</li>`).join('')}</ul>`;
+    if (s.kind === 'split') {
+      const pts = s.bullets.length ? s.bullets : s.items.map(x => x.title);
+      return `<section class="hs hs-split-wrap"><div class="hs-in hs-split${i % 2 ? ' rev' : ''}"><div class="hs-media" data-reveal="${i % 2 ? 'right' : 'left'}">${media(s.image)}</div><div data-reveal="${i % 2 ? 'left' : 'right'}">${head}${pts.length ? `<ul class="hs-bul">${pts.slice(0, 5).map(b => `<li>${esc(b)}</li>`).join('')}</ul>` : ''}</div></div></section>`;
+    }
+    if (s.kind === 'text') return `<section class="hs hs-text"><div class="hs-in" data-reveal>${head}</div></section>`;
+    return `<section class="hs hs-${s.kind}"><div class="hs-in">${head.replace('class="hs-head"', 'class="hs-head" data-reveal')}${body}</div></section>`;
+  }).join('');
 }
 
 /* ---------------- page shell ---------------- */
@@ -169,6 +241,21 @@ html.js [data-reveal].in{opacity:1;transform:none}
 .plate{overflow:hidden;position:relative;contain:paint}.plate img{width:100%;height:100%;object-fit:cover}.plate.photo{background:#fff}.plate.photo img{object-fit:contain;padding:6%}
 .hide{display:none!important}
 html.paused :is(.amb,.amb *){animation-play-state:paused!important}
+.hs{padding:clamp(52px,7vw,104px) 0;position:relative}.hs-in{width:min(var(--hs-w,1180px),100% - 40px);margin-inline:auto}
+.hs-head{max-width:720px;margin:0 0 clamp(24px,4vw,46px)}.hs-k{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--brand);margin-bottom:12px}
+.hs-t{font-family:var(--hs-ff,inherit);font-weight:var(--hs-fw,700);font-size:clamp(28px,4vw,54px);line-height:1.04;letter-spacing:var(--hs-ls,-.03em);text-transform:var(--hs-tt,none);margin:0}
+.hs-p{color:var(--muted);margin:14px 0 0;max-width:54ch;font-size:clamp(15px,1.4vw,18px)}
+.hs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:16px}
+.hs-card{background:var(--card);border:1px solid var(--line);border-radius:var(--hs-r,20px);padding:12px;display:flex;flex-direction:column;overflow:hidden;transition:transform .35s cubic-bezier(.2,.8,.2,1),border-color .3s;contain:layout paint}.hs-card:hover{transform:translate3d(0,-5px,0);border-color:var(--brand)}
+.hs-card .plate{aspect-ratio:16/10;border-radius:calc(var(--hs-r,20px) - 8px)}.hs-card h3{font-family:var(--hs-ff,inherit);font-size:19px;margin:14px 8px 4px;line-height:1.2}.hs-card p{margin:0 8px 8px;color:var(--muted);font-size:14px}.hs-card.noimg{padding:24px}.hs-card.noimg h3{margin:0 0 8px}.hs-card.noimg p{margin:0}
+.hs-split{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,5vw,64px);align-items:center}.hs-split.rev .hs-media{order:2}.hs-media .plate{aspect-ratio:5/4;border-radius:var(--hs-r,24px);border:1px solid var(--line)}.hs-split .hs-head{margin-bottom:0}
+.hs-bul{list-style:none;padding:0;margin:22px 0 0;display:grid;gap:10px}.hs-bul li{display:flex;gap:12px;align-items:flex-start;font-weight:500}.hs-bul li::before{content:"";flex:none;width:8px;height:8px;margin-top:.6em;border-radius:50%;background:var(--brand)}
+.hs-list{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}.hs-list li{padding:16px 18px;border:1px solid var(--line);border-radius:calc(var(--hs-r,20px) - 6px);background:var(--card);font-weight:600;display:flex;gap:10px;align-items:center}.hs-list li::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--brand)}
+.hs-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:16px}.hs-step{padding:24px;border:1px solid var(--line);border-radius:var(--hs-r,20px);background:var(--card)}.hs-step b{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--brand);color:var(--brand-ink);font-size:14px;margin-bottom:14px}.hs-step h3{font-family:var(--hs-ff,inherit);margin:0 0 6px;font-size:21px}.hs-step p{margin:0;color:var(--muted);font-size:15px}
+.hs-logos{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px}.hs-logos .lg{background:#fff;border-radius:14px;padding:14px;height:78px;display:grid;place-items:center;border:1px solid var(--line)}.hs-logos img{max-height:48px;max-width:100%;width:auto;object-fit:contain;filter:grayscale(1);opacity:.8;transition:filter .3s,opacity .3s}.hs-logos .lg:hover img{filter:none;opacity:1}
+.hs-quotes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}.hs-q{margin:0;background:var(--card);border:1px solid var(--line);border-radius:var(--hs-r,20px);padding:28px}.hs-q p{font-size:clamp(17px,1.8vw,22px);line-height:1.35;margin:0 0 16px}.hs-q cite{font-style:normal;color:var(--muted);font-size:13px}
+.hs:has(.hs-logos:empty){display:none}.hs-text{text-align:center}.hs-text .hs-head{margin-inline:auto}.hs-text .hs-p{margin-inline:auto;font-size:clamp(17px,2vw,24px)}
+@media(max-width:900px){.hs-split{grid-template-columns:1fr}.hs-split.rev .hs-media{order:0}}
 .wdg-toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:99px;font:600 13px system-ui;opacity:0;pointer-events:none;transition:.3s;z-index:400;max-width:90vw;text-align:center}.wdg-toast.show{opacity:1;transform:translate(-50%,0)}
 #wdg-q{position:fixed;inset:0;z-index:300;pointer-events:none}#wdg-q .wq-bg{position:absolute;inset:0;background:rgba(0,0,0,.5);opacity:0;transition:opacity .3s}
 #wdg-q .wq-panel{position:absolute;right:0;top:0;bottom:0;width:min(420px,100%);background:var(--bg2,var(--bg));color:var(--fg);border-left:1px solid var(--line);padding:28px 24px;overflow:auto;transform:translateX(102%);transition:transform .45s cubic-bezier(.2,.8,.2,1);font-family:system-ui,sans-serif}

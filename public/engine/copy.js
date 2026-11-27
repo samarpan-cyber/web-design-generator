@@ -134,7 +134,7 @@ export function voiceCopy(voice, m, topic) {
   const n = NOUN[topic];
   const V = [
     { // 0 NOIR: confident, dry tech wit
-      eyebrow: 'Quotes open. Excuses closed.', ctaA: 'See the hardware', ctaB: 'Request a quote',
+      eyebrow: 'Quotes open. Excuses closed.', kinds: { cards: 'Capabilities', split: 'In focus', list: 'Highlights', steps: 'Process', logos: 'Trusted by', quotes: 'Field notes', text: 'Overview' }, kf: (n, l) => `0${n} / ${l}`, homeSectors: 'Where it ships', homeCerts: 'On the wall', ctaA: 'See the hardware', ctaB: 'Request a quote',
       marqueeLead: 'Built for', featKicker: 'On the bench', featTitle: 'Fresh from the lineup', featLink: 'Browse everything',
       statsKicker: 'By the numbers', statsTitle: 'Numbers, no spin', bandTitle: 'Got a spec? Send it over.', bandSub: 'We read datasheets for fun. Mostly.', bandCta: 'Start a quote',
       prodTitle: 'The full lineup', prodSub: `Search it, shortlist it, quote it. Your ${n} shopping list writes itself.`, search: 'Search the lineup', empty: 'Nothing matched. Try a shorter word.', add: 'Add to quote', details: 'Details',
@@ -145,7 +145,7 @@ export function voiceCopy(voice, m, topic) {
       foot: 'Quality is a habit, not a department.', navCta: 'Talk to us', pill: 'Open quotes'
     },
     { // 1 BENTO: warm, friendly-smart
-      eyebrow: 'Now taking quote requests', ctaA: 'Browse the catalogue', ctaB: 'Talk to sales',
+      eyebrow: 'Now taking quote requests', kinds: { cards: 'What we do', split: 'Our story', list: 'Good to know', steps: 'How it works', logos: 'Our customers', quotes: 'Kind words', text: 'In short' }, kf: (n, l) => `${n}. ${l}`, homeSectors: 'Who we help', homeCerts: 'Quality marks', ctaA: 'Browse the catalogue', ctaB: 'Talk to sales',
       marqueeLead: 'Trusted in', featKicker: 'Start here', featTitle: 'A few favourites', featLink: 'See the whole catalogue',
       statsKicker: 'At a glance', statsTitle: 'The short version, in digits', bandTitle: 'Your next project starts with a hello.', bandSub: 'Tell us the goal. We will help with the parts.', bandCta: 'Ask for a quote',
       prodTitle: 'Everything we supply', prodSub: 'Filter by name, pick what you like, and we will price it together.', search: 'Search products', empty: 'No match yet. Try a different word.', add: 'Add to quote', details: 'Learn more',
@@ -156,7 +156,7 @@ export function voiceCopy(voice, m, topic) {
       foot: 'Good parts. Good people. Good Mondays.', navCta: 'Get a quote', pill: 'Say hello'
     },
     { // 2 BLUEPRINT: precise, deadpan engineer humour
-      eyebrow: 'Revision C. Approved by nobody yet.', ctaA: 'Open the catalogue', ctaB: 'Submit an RFQ',
+      eyebrow: 'Revision C. Approved by nobody yet.', kinds: { cards: 'Specification', split: 'Detail view', list: 'Notes', steps: 'Procedure', logos: 'References', quotes: 'Reviews', text: 'Summary' }, kf: (n, l) => `FIG. 0${n} / ${l}`, homeSectors: 'Sectors served', homeCerts: 'Approvals', ctaA: 'Open the catalogue', ctaB: 'Submit an RFQ',
       marqueeLead: 'Applications', featKicker: 'Fig. 01', featTitle: 'Selected drawings', featLink: 'Full catalogue',
       statsKicker: 'Key figures', statsTitle: 'Measured, not guessed', bandTitle: 'Attach your drawing. We will do the rest.', bandSub: 'Tolerances welcome.', bandCta: 'Open RFQ form',
       prodTitle: 'Catalogue', prodSub: 'Every item, one line each. Sorted by curiosity.', search: 'FILTER ITEMS', empty: 'NO ITEMS MATCH THE QUERY.', add: '+ RFQ', details: 'Datasheet',
@@ -167,7 +167,7 @@ export function voiceCopy(voice, m, topic) {
       foot: 'Dimensions in millimetres. Opinions in footnotes.', navCta: 'RFQ', pill: 'Sheet index'
     },
     { // 3 AURORA: smooth, futuristic, short
-      eyebrow: 'Hardware, but make it effortless', ctaA: 'Explore the range', ctaB: 'Get a quote',
+      eyebrow: 'Hardware, but make it effortless', kinds: { cards: 'Capabilities', split: 'Spotlight', list: 'Highlights', steps: 'Flow', logos: 'Powering', quotes: 'Voices', text: 'The idea' }, kf: (n, l) => `${n} \u00b7 ${l}`, homeSectors: 'Sectors', homeCerts: 'Certified', ctaA: 'Explore the range', ctaB: 'Get a quote',
       marqueeLead: 'Powering', featKicker: 'Spotlight', featTitle: 'Engineered to stand out', featLink: 'View the range',
       statsKicker: 'The glow-up', statsTitle: 'Proof, in numbers', bandTitle: 'Make something remarkable.', bandSub: 'We will bring the hardware.', bandCta: 'Start a quote',
       prodTitle: 'The range', prodSub: 'Tap, compare and shortlist. Your quote builds itself.', search: 'Search the range', empty: 'Nothing here. Try another word.', add: 'Add to quote', details: 'Open',
@@ -178,7 +178,7 @@ export function voiceCopy(voice, m, topic) {
       foot: 'Designed to disappear into your product.', navCta: 'Quote', pill: 'Hello'
     },
     { // 4 KINETIC: loud, punchy, editorial
-      eyebrow: 'Loud hardware. Quiet failures.', ctaA: 'See the index', ctaB: 'Contact',
+      eyebrow: 'Loud hardware. Quiet failures.', kinds: { cards: 'What we do', split: 'Closer look', list: 'Quick hits', steps: 'The routine', logos: 'Clients', quotes: 'Receipts', text: 'Straight talk' }, kf: (n, l) => `${n}. ${l}`, homeSectors: 'Who we serve', homeCerts: 'Badges', ctaA: 'See the index', ctaB: 'Contact',
       marqueeLead: 'For', featKicker: 'Highlights', featTitle: 'Start with these', featLink: 'All products',
       statsKicker: 'Receipts', statsTitle: 'Numbers that talk', bandTitle: 'Let\'s talk.', bandSub: 'Seriously. It is free.', bandCta: 'Request a quote',
       prodTitle: 'Index', prodSub: 'Pick a product. Add it to the quote. That is the whole process.', search: 'Filter products', empty: 'Nothing matches.', add: '+ Quote', details: 'Open',

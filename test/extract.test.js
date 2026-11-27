@@ -52,3 +52,9 @@ test('contact blocks are not used as the company description', async () => {
   assert.match(p.about, /manufactures precision capacitors/);
   assert.ok(!/Phone/.test(p.description));
 });
+
+test('company name ignores generic title segments like Home', async () => {
+  const html = '<html><head><title>Home | Acme Power Systems</title></head><body><h1>Hi</h1></body></html>';
+  const p = await extractProfile('acme-power.example', { fetcher: async u => ({ text: html, url: u.startsWith('http') ? u : 'https://acme-power.example/' }) });
+  assert.equal(p.name, 'Acme Power Systems');
+});

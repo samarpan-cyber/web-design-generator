@@ -27,7 +27,7 @@ const state = { leads: [], profile: null, mode: 'auto', agency: store.get('wdg-a
 
 /* ---------------- chrome helpers ---------------- */
 const toast = t => { const el = $('#toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 2000); };
-function setStep(n) { $$('#steps li').forEach(li => { const s = +li.dataset.s; li.classList.toggle('on', s === n); li.classList.toggle('done', s < n); }); }
+function setStep(n) { $$('#steps li').forEach(li => { const s = +li.dataset.s; li.classList.toggle('on', s === n); li.classList.toggle('done', s < n); li.classList.toggle('off', s >= 3 && !state.profile); }); }
 const msgs = $('#msgs');
 function say(html, cls = 'bot') { const el = document.createElement('div'); el.className = 'msg ' + cls; el.innerHTML = html; msgs.appendChild(el); msgs.scrollTop = msgs.scrollHeight; return el; }
 const generatorUrl = () => location.origin + location.pathname + '#/electronics';
@@ -35,18 +35,24 @@ const generatorUrl = () => location.origin + location.pathname + '#/electronics'
 /* ---------------- routing: #/ (industry) -> #/electronics -> #/electronics/view/N ---------------- */
 function navTo(hash, replace) { if (replace) { history.replaceState(null, '', hash); route(); } else location.hash = hash; }
 function route() {
-  const m = (location.hash || '#/').match(/^#\/([a-z]+)(?:\/view\/(\d))?$/);
+  const m = (location.hash || '#/').match(/^#\/([a-z]+)(?:\/(compare))?(?:\/view\/(\d))?$/);
   const ind = m && INDUSTRIES.find(i => i.id === m[1] && i.ready);
   if (!ind) { showGate(); return; }
-  showApp(ind);
-  if (m[2] !== undefined && state.profile && +m[2] < TEMPLATES.length) showViewer(+m[2]); else hideViewer();
+  const wantsCompare = !!(m[2] || m[3] !== undefined);
+  if (wantsCompare && !state.profile) history.replaceState(null, '', '#/' + ind.id);
+  showApp(ind, wantsCompare && !!state.profile);
+  if (m[3] !== undefined && state.profile && +m[3] < TEMPLATES.length) showViewer(+m[3]); else hideViewer();
 }
 function showGate() {
   hideViewer(); $('#gate').hidden = false; $('#app').hidden = true; $('#topActions').hidden = true; setStep(1); document.title = 'Design Generator | Pick an industry'; window.scrollTo(0, 0);
 }
-function showApp(ind) {
+function showApp(ind, compare) {
   $('#gate').hidden = true; $('#app').hidden = false; $('#topActions').hidden = false; $('#indName').textContent = ind.name; state.industry = ind;
-  setStep(state.profile ? 3 : 2); document.title = state.profile ? `${state.profile.name} | Design Generator` : 'Design Generator | ' + ind.name;
+  const hasP = !!state.profile;
+  if (!state.busy) { $('#welcome').hidden = !!compare; $('#results').hidden = !compare; }
+  $('#resume').hidden = !(hasP && !compare); if (hasP) $('#resumeText').textContent = `Five designs for ${state.profile.name} are ready.`;
+  $('#editBtn').disabled = !hasP;
+  setStep(compare ? 3 : 2); document.title = compare ? `${state.profile.name} | Design Generator` : 'Design Generator | ' + ind.name;
   if (!state.booted) boot();
 }
 
@@ -146,7 +152,7 @@ function post(frame, msg) { try { frame.contentWindow.postMessage(msg, '*'); } c
 
 function showResults(profile) {
   state.profile = profile; state.favs = new Set();
-  $('#welcome').hidden = true; $('#results').hidden = false; $('#editBtn').disabled = false; $('#pitchBtn').disabled = false; $('#dlAll').disabled = false; setStep(3);
+  $('#welcome').hidden = true; $('#results').hidden = false; $('#editBtn').disabled = false; $('#pitchBtn').disabled = false; $('#dlAll').disabled = false; $('#resume').hidden = true; setStep(3);
   document.title = `${profile.name} | Design Generator`;
   $('#resTitle').textContent = profile.name; $('#resMeta').textContent = `${profile.host}. Five concepts, five pages each. Star your favourites, then copy the pitch note.`;
   const grid = $('#grid'); grid.innerHTML = '';
@@ -167,6 +173,7 @@ function showResults(profile) {
     io.observe(card); ro.observe(shot);
   });
   if (innerWidth >= 980) $('#stage').scrollTo({ top: 0, behavior: 'smooth' });
+  if (!/\/compare/.test(location.hash)) navTo('#/' + (state.industry ? state.industry.id : 'electronics') + '/compare');
 }
 function setMode(mode) {
   state.mode = mode; $$('#themeSeg button').forEach(b => b.classList.toggle('on', b.dataset.t === mode));
@@ -184,15 +191,16 @@ function pitchNote() {
   const p = state.profile, picks = [...state.favs].sort().map(i => TEMPLATES[i].name);
   return [`Hi ${p.name} team,`, '', `I rebuilt ${p.host} as five fresh website concepts, using your real products and branding. Each one has five pages, works on phones, and includes dark mode, product search and a quote basket.`, picks.length ? `My pick for you: ${picks.join(' and ')}.` : '', 'Happy to walk you through them. Which one feels most like you?', '', state.agency || ''].filter((l, i, a) => l || (a[i - 1] && a[i + 1] !== undefined)).join('\n').trim();
 }
+function openPitch() { if (!state.profile) return; $('#pitchText').value = pitchNote(); $('#pitchDlg').showModal(); setStep(4); }
 async function copyPitch() {
-  const text = pitchNote();
+  const text = $('#pitchText').value || pitchNote();
   try { await navigator.clipboard.writeText(text); } catch { const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch { /* ignore */ } ta.remove(); }
   toast('Pitch note copied'); setStep(4);
 }
 
 /* ---------------- full-screen viewer (history aware, so Back works) ---------------- */
 function openViewer(i) {
-  const wasOpen = !$('#viewer').hidden, hash = `#/${state.industry ? state.industry.id : 'electronics'}/view/${i}`;
+  const wasOpen = !$('#viewer').hidden, hash = `#/${state.industry ? state.industry.id : 'electronics'}/compare/view/${i}`;
   if (wasOpen) navTo(hash, true); else { state.pushedView = true; navTo(hash, false); }
 }
 function showViewer(i) {
@@ -210,7 +218,7 @@ function mountFrame(html) {
   old.replaceWith(f);
 }
 function hideViewer() { if ($('#viewer').hidden) return; $('#viewer').hidden = true; state.pushedView = false; document.body.style.overflow = ''; mountFrame(null); }
-function closeViewer() { if (state.pushedView) { state.pushedView = false; history.back(); } else navTo('#/electronics', true); }
+function closeViewer() { if (state.pushedView) { state.pushedView = false; history.back(); } else navTo('#/electronics/compare', true); }
 
 /* ---------------- edit details ---------------- */
 function openEdit() {
@@ -238,7 +246,10 @@ document.addEventListener('click', e => {
 });
 $('#leadSearch').addEventListener('input', e => drawLeads(e.target.value));
 $$('#themeSeg button').forEach(b => b.onclick = () => setMode(b.dataset.t));
-$('#editBtn').onclick = openEdit; $('#pitchBtn').onclick = copyPitch;
+$('#editBtn').onclick = openEdit; $('#pitchBtn').onclick = openPitch; $('#pitchCopy').onclick = copyPitch;
+$('#pitchDl').onclick = () => TEMPLATES.forEach((_, i) => setTimeout(() => download(i), i * 400));
+$('#newSite').onclick = () => navTo('#/electronics'); $('#resumeBtn').onclick = () => navTo('#/electronics/compare');
+$$('#steps li button').forEach(b => b.onclick = () => { const n = +b.parentNode.dataset.s; if (n === 1) navTo('#/'); else if (n === 2) navTo('#/electronics'); else if (!state.profile) toast('Generate a design first'); else if (n === 3) navTo('#/electronics/compare'); else openPitch(); });
 $('#dlAll').onclick = () => TEMPLATES.forEach((_, i) => setTimeout(() => download(i), i * 400));
 $('#vClose').onclick = closeViewer; $('#vPrev').onclick = () => openViewer(state.viewer - 1); $('#vNext').onclick = () => openViewer(state.viewer + 1); $('#vDl').onclick = () => download(state.viewer);
 $$('#devSeg button').forEach(b => b.onclick = () => { $$('#devSeg button').forEach(x => x.classList.toggle('on', x === b)); $('#vFrame').style.width = b.dataset.d; });

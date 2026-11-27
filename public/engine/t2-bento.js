@@ -1,5 +1,5 @@
 // Design 2, BENTO LAB. Warm, editorial, light-first. Serif headlines, floating pill nav, bento tiles, masonry catalogue.
-import { esc, buildModel, shell, themeVars, media, logoMark, themeBtn, menuBtn, quoteBtn, goLink, navLinks, mobileLinks, socialLinks, contactForm, factList } from './common.js';
+import { esc, sectionsHtml, buildModel, shell, themeVars, media, logoMark, themeBtn, menuBtn, quoteBtn, goLink, navLinks, mobileLinks, socialLinks, contactForm, factList } from './common.js';
 
 const PAGES = [['home', 'Home'], ['catalogue', 'Catalogue'], ['why', 'Why us'], ['company', 'Company'], ['contact', 'Contact']];
 
@@ -9,6 +9,7 @@ ${themeVars(m, {
   dark: { bg: '#141310', bg2: '#1c1a16', fg: '#f4efe6', muted: '#a39c8e', line: 'rgba(244,239,230,.12)', card: '#1e1c18' }
 })}
 body{font-family:'DM Sans',system-ui,sans-serif;line-height:1.55;font-size:16px}
+:root{--hs-w:1180px;--hs-ff:'DM Serif Display',Georgia,serif;--hs-fw:400;--hs-ls:-.01em;--hs-r:30px}.hs-card,.hs-step,.hs-q,.hs-list li{box-shadow:0 14px 40px -28px rgba(0,0,0,.35)}.hs-t{font-size:clamp(32px,4.8vw,62px)}
 .serif{font-family:'DM Serif Display',Georgia,serif;font-weight:400;letter-spacing:-.01em}
 .wrap{width:min(1180px,100% - 40px);margin-inline:auto}
 header[data-header]{position:fixed;top:12px;left:0;right:0;z-index:80;display:flex;justify-content:center;pointer-events:none;padding:0 12px}
@@ -75,6 +76,7 @@ export function renderBento(profile, opts = {}) {
 <h1 class="serif" data-reveal data-delay="70">${esc(m.headline)}</h1><p class="lead" data-reveal data-delay="130">${esc(m.sub)}</p>
 <div class="cta" data-reveal data-delay="190"><a class="btn brand lg" href="#/catalogue" data-go="catalogue" data-magnetic>${esc(t.ctaA)}</a><a class="btn ghost lg" href="#/contact" data-go="contact" data-magnetic>${esc(t.ctaB)}</a></div>
 <div class="stage"><div class="screen" data-scrollvar>${media(m.img.hero)}</div></div></div></section>
+${sectionsHtml(m)}
 <section class="blk"><div class="wrap">${title(t.featKicker, t.featTitle)}
 <div class="bento">
 <div class="tile a" data-spot data-reveal="zoom">${media(P[0])}<div class="cap"><h3 class="serif">${esc(P[0].name)}</h3>${P[0].desc2 ? `<p>${esc(P[0].desc2)}</p>` : ''}<button class="btn brand" style="margin-top:14px" data-quote="${esc(P[0].name)}"><span data-label>${esc(t.add)}</span></button></div></div>
@@ -90,8 +92,7 @@ ${s1 ? `<div class="tile c" data-reveal data-delay="140"><div class="big serif" 
 <div><div class="mason">${P.map((p, i) => pcard(p, i, t)).join('')}</div><p class="empty" data-empty hidden>${esc(t.empty)}</p></div></div></div></section>`;
 
   const why = `<section class="blk" style="padding-top:130px"><div class="wrap">${title(PAGES[2][1], t.solTitle, t.solSub)}
-<div class="sectors">${m.sectors.map((s, i) => `<div class="sector" data-reveal data-delay="${(i % 3) * 70}"><div class="no serif">${String(i + 1).padStart(2, '0')}</div><h3 class="serif">${esc(s.name)}</h3><p>${esc(s.line)}</p></div>`).join('')}</div></div></section>
-<section class="blk" style="padding-top:0"><div class="wrap">${title(t.stepsTitle, t.stepsTitle)}<div class="how">${t.steps.map(([a, b], i) => `<div data-reveal data-delay="${i * 80}"><b class="serif">${i + 1}</b><h3 class="serif">${esc(a)}</h3><p>${esc(b)}</p></div>`).join('')}</div></div></section>`;
+<div class="sectors">${m.sectors.map((s, i) => `<div class="sector" data-reveal data-delay="${(i % 3) * 70}"><div class="no serif">${String(i + 1).padStart(2, '0')}</div><h3 class="serif">${esc(s.name)}</h3><p>${esc(s.line)}</p></div>`).join('')}</div></div></section>`;
 
   const facts = factList(m);
   const factHtml = `<div class="facts">${facts.map(([k, v, h]) => `<div><b>${esc(k)}</b>${h ? `<a href="${esc(h)}" target="_blank" rel="noopener">${esc(v)}</a>` : `<span>${esc(v)}</span>`}</div>`).join('')}</div>`;

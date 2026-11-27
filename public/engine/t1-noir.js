@@ -1,5 +1,5 @@
 // Design 1, CIRCUIT NOIR. Dark tech look. Top bar + command palette (Cmd/Ctrl+K), live trace canvas, drag rail.
-import { esc, buildModel, shell, themeVars, media, logoMark, themeBtn, menuBtn, quoteBtn, goLink, navLinks, mobileLinks, socialLinks, contactForm, factList } from './common.js';
+import { esc, sectionsHtml, buildModel, shell, themeVars, media, logoMark, themeBtn, menuBtn, quoteBtn, goLink, navLinks, mobileLinks, socialLinks, contactForm, factList } from './common.js';
 
 const PAGES = [['home', 'Home'], ['products', 'Products'], ['industries', 'Industries'], ['company', 'Company'], ['contact', 'Contact']];
 
@@ -9,6 +9,7 @@ ${themeVars(m, {
   light: { bg: '#f3f5f8', bg2: '#ffffff', fg: '#0b1220', muted: '#566174', line: 'rgba(11,18,32,.12)', card: '#ffffff' }
 })}
 body{font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.55;font-size:16px}
+:root{--hs-w:1240px;--hs-ff:'Space Grotesk',sans-serif;--hs-r:22px}.hs-k{font-family:'JetBrains Mono',monospace;font-weight:500}.hs:nth-of-type(odd){background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--bg2) 70%,transparent),transparent)}
 .mono{font-family:'JetBrains Mono',ui-monospace,monospace;letter-spacing:.01em}
 .wrap{width:min(1240px,100% - 40px);margin-inline:auto}
 header[data-header]{position:fixed;inset:0 0 auto 0;z-index:80;padding:14px 0;transition:background .3s,padding .3s,border-color .3s;border-bottom:1px solid transparent}
@@ -125,7 +126,8 @@ export function renderNoir(profile, opts = {}) {
  ${m.certs.length ? `<div class="certs mono" data-reveal data-delay="280">${m.certs.map(c => `<span>${esc(c)}</span>`).join('')}</div>` : ''}</div>
  <div class="device" data-tilt="8" data-reveal="zoom" data-delay="160">${media(m.img.hero)}<span class="tag mono t1 amb"><b>01</b> ${esc(m.sectors[0].name.slice(0, 24))}</span>${m.sectors[1] ? `<span class="tag mono t2 amb"><b>02</b> ${esc(m.sectors[1].name.slice(0, 24))}</span>` : ''}</div></div></section>
 <div class="marq amb" aria-hidden="true"><div class="marq-track mono"><span>${marq.map(esc).join('</span><span>')}</span><span>${marq.map(esc).join('</span><span>')}</span></div></div>
-<section class="blk"><div class="wrap">${head('01 / ' + t.featKicker, t.featTitle, '', `<div class="rail-ctrl hide-m"><button data-rail="-1" aria-label="Previous">←</button><button data-rail="1" aria-label="Next">→</button></div>`)}</div>
+${sectionsHtml(m)}
+<section class="blk"><div class="wrap">${head('/ ' + t.featKicker, t.featTitle, '', `<div class="rail-ctrl hide-m"><button data-rail="-1" aria-label="Previous">←</button><button data-rail="1" aria-label="Next">→</button></div>`)}</div>
  <div class="rail">${P.slice(0, 6).map((p, i) => card(p, i, t, true)).join('')}</div><div class="wrap" style="margin-top:12px">${goLink('products', t.featLink + ' →', 'btn')}</div></section>
 <section class="blk" style="padding-top:0"><div class="wrap"><div class="kicker mono">${esc(t.statsKicker)}</div><div class="stats">${m.stats.map(s => `<div class="stat" data-reveal><b data-count="${s.value}" data-suffix="${esc(s.suffix)}">0</b><span class="mono">${esc(s.label)}</span></div>`).join('')}</div></div></section>
 <section class="blk" style="padding-top:0"><div class="wrap"><div class="band" data-reveal="zoom"><h2>${esc(t.bandTitle)}</h2><p>${esc(t.bandSub)}</p><div class="cta"><button class="btn primary" data-quote-open data-magnetic>${esc(t.bandCta)}</button></div></div></div></section>`;
@@ -135,8 +137,7 @@ export function renderNoir(profile, opts = {}) {
  <div class="grid">${P.map((p, i) => card(p, i, t)).join('')}</div><p class="empty" data-empty hidden>${esc(t.empty)}</p></div></section>`;
 
   const industries = `<div class="phead"><div class="wrap"><div class="kicker mono">/ ${esc(PAGES[2][1])}</div><h1>${esc(t.solTitle)}</h1><p class="psub">${esc(t.solSub)}</p></div></div>
-<section class="blk" style="padding-top:30px"><div class="wrap"><div class="rows">${m.sectors.map((s, i) => `<div class="row-i" data-reveal data-delay="${i * 40}"><span class="n mono">${String(i + 1).padStart(2, '0')}</span><strong>${esc(s.name)}</strong><p>${esc(s.line)}</p></div>`).join('')}</div></div></section>
-<section class="blk" style="padding-top:0"><div class="wrap">${head('/ ' + t.stepsTitle, t.stepsTitle, '')}<div class="steps">${t.steps.map(([a, b], i) => `<div class="step" data-reveal data-delay="${i * 80}"><b class="mono">0${i + 1}</b><h3>${esc(a)}</h3><p>${esc(b)}</p></div>`).join('')}</div></div></section>`;
+<section class="blk" style="padding-top:30px"><div class="wrap"><div class="rows">${m.sectors.map((s, i) => `<div class="row-i" data-reveal data-delay="${i * 40}"><span class="n mono">${String(i + 1).padStart(2, '0')}</span><strong>${esc(s.name)}</strong><p>${esc(s.line)}</p></div>`).join('')}</div></div></section>`;
 
   const facts = factList(m);
   const company = `<div class="phead"><div class="wrap"><div class="kicker mono">/ ${esc(PAGES[3][1])}</div><h1>${esc(t.aboutTitle)}</h1><p class="psub">${esc(t.aboutSub)}</p></div></div>

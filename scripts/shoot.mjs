@@ -10,7 +10,7 @@ const { chromium } = require('playwright');
 
 const out = path.resolve(process.argv[2] || 'shots'); fs.mkdirSync(out, { recursive: true });
 const ids = process.argv.slice(3).length ? process.argv.slice(3) : TEMPLATES.map(t => t.id);
-const html = fs.readFileSync(new URL('../test/fixtures/sample.html', import.meta.url), 'utf8');
+const html = fs.readFileSync(new URL(`../test/fixtures/${process.env.FIXTURE || 'sample'}.html`, import.meta.url), 'utf8');
 const profile = await extractProfile('volt.example', { fetcher: async u => ({ text: u.endsWith('.css') ? '' : html, url: u.startsWith('http') ? u : 'https://volt.example/' }) });
 fs.writeFileSync(path.join(out, 'profile.json'), JSON.stringify(profile, null, 1));
 const VIEWS = { phone: { width: 390, height: 844 }, tablet: { width: 820, height: 1100 }, desktop: { width: 1440, height: 900 } };

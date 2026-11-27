@@ -14,7 +14,7 @@
 <header class="top">
   <a class="brand" href="#/" aria-label="Design Generator home"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16l5-8 4 6 3-4 6 6"/></svg></span><b>Design Generator</b><em class="ver">V2</em></a>
   <ol class="steps" id="steps" aria-label="Progress">
-    <li data-s="1"><i>1</i>Industry</li><li data-s="2"><i>2</i>Website</li><li data-s="3"><i>3</i>Compare</li><li data-s="4"><i>4</i>Pitch</li>
+    <li data-s="1"><button type="button"><i>1</i><span>Industry</span></button></li><li data-s="2"><button type="button"><i>2</i><span>Website</span></button></li><li data-s="3"><button type="button"><i>3</i><span>Compare</span></button></li><li data-s="4"><button type="button"><i>4</i><span>Pitch</span></button></li>
   </ol>
   <div class="top-actions" id="topActions" hidden>
     <a class="ghost" href="#/" id="changeInd">Change industry</a>
@@ -48,6 +48,7 @@
 
   <section class="stage" id="stage">
     <div class="welcome" id="welcome">
+      <div class="resume" id="resume" hidden><span id="resumeText"></span><button class="primary" id="resumeBtn" type="button">Back to the five designs</button></div>
       <p class="eyebrow">Step 2 of 4</p>
       <h2>Paste a website.<br><span>Get five better ones.</span></h2>
       <p class="sub">We read the live site, then rebuild it five different ways. Real products, real branding, five pages each, mobile ready.</p>
@@ -56,7 +57,7 @@
     </div>
     <div class="results" id="results" hidden>
       <div class="res-head"><div><p class="eyebrow">Step 3 of 4</p><h2 id="resTitle"></h2><p id="resMeta"></p></div>
-        <div class="res-actions"><button class="ghost" id="pitchBtn">Copy pitch note</button><button class="ghost" id="dlAll">Download all 5</button></div></div>
+        <div class="res-actions"><button class="ghost" id="newSite" type="button">&larr; New website</button><button class="ghost" id="pitchBtn">Pitch note</button><button class="ghost" id="dlAll">Download all 5</button></div></div>
       <div class="grid" id="grid"></div>
     </div>
   </section>
@@ -82,6 +83,11 @@
   <label>Logo URL<input name="logo" placeholder="https://"></label>
   <div class="two"><label>Email<input name="email"></label><label>Phone<input name="phone"></label></div>
   <div class="dlg-actions"><button value="cancel" class="ghost">Cancel</button><button value="ok" class="primary">Apply</button></div>
+</form></dialog>
+<dialog id="pitchDlg"><form method="dialog" class="edit">
+  <h3>Your pitch note</h3><p class="hint">Short, friendly and ready to send. Starred designs are mentioned by name.</p>
+  <textarea id="pitchText" rows="9" readonly></textarea>
+  <div class="dlg-actions"><button value="close" class="ghost">Close</button><button type="button" class="ghost" id="pitchDl">Download all 5</button><button type="button" class="primary" id="pitchCopy">Copy note</button></div>
 </form></dialog>
 <div class="toast" id="toast"></div>
 <script type="module" src="app.js"></script>

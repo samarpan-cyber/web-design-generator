@@ -8,6 +8,8 @@ import { brief, noDash } from '../public/engine/copy.js';
 
 const sampleHtml = fs.readFileSync(new URL('./fixtures/sample.html', import.meta.url), 'utf8');
 const fixture = await extractProfile('volt.example', { fetcher: async u => ({ text: u.endsWith('.css') ? '' : sampleHtml, url: u.startsWith('http') ? u : 'https://volt.example/' }) });
+const richHtml = fs.readFileSync(new URL('./fixtures/rich.html', import.meta.url), 'utf8');
+const rich = await extractProfile('rich.example', { fetcher: async u => ({ text: richHtml, url: u.startsWith('http') ? u : 'https://rich.example/' }) });
 const minimal = { name: 'Acme', host: 'acme.test', url: 'https://acme.test', colors: {}, nav: [], categories: [], products: [], images: [], headings: [], stats: [], certifications: [], industries: [], contacts: { emails: [], phones: [], address: '' }, social: {} };
 // A messy real-world profile: dashes everywhere, boilerplate descriptions, same text reused
 const dashy = { ...fixture, name: 'Volt — Dynamics', description: 'We build drives – and inverters. Based in Gandhinagar. Serving 12 countries.', about: 'We build drives – and inverters. Based in Gandhinagar. Serving 12 countries.', tagline: 'Power — delivered',
@@ -42,7 +44,7 @@ for (const t of TEMPLATES) {
   }
 
   test(`${t.id}: never contains an em or en dash anywhere`, () => {
-    for (const p of [fixture, dashy, minimal]) {
+    for (const p of [fixture, dashy, minimal, rich]) {
       const html = t.render(p, { theme: 'dark', agency: 'Studio' });
       const hit = html.match(/.{0,30}[–—].{0,30}/);
       assert.ok(!hit, 'dash found: ' + (hit && hit[0]));
@@ -51,7 +53,7 @@ for (const t of TEMPLATES) {
   });
 
   test(`${t.id}: no line of copy is repeated across the whole site`, () => {
-    for (const p of [fixture, dashy]) {
+    for (const p of [fixture, dashy, rich]) {
       const $ = visible(t.render(p, { theme: 'dark' }));
       const skip = new Set([...(p.products || []).map(x => x.name), ...(p.industries || []), ...(p.categories || []), p.name].map(s => noDash(s).toLowerCase()));
       const seen = new Map();
@@ -88,4 +90,28 @@ test('the five designs use five different font stacks and nav patterns', () => {
   const sig = TEMPLATES.map(t => { const h = t.render(fixture, {}); return { fonts: (h.match(/family=([^&:]+)/g) || []).join(','), tpl: (h.match(/data-tpl="(\w+)"/) || [])[1] }; });
   assert.equal(new Set(sig.map(s => s.fonts)).size, TEMPLATES.length, 'unique font combos');
   assert.equal(new Set(sig.map(s => s.tpl)).size, TEMPLATES.length);
+});
+
+for (const t of TEMPLATES) {
+  test(`${t.id}: home page mirrors the site section by section`, () => {
+    const $ = visible(t.render(rich, { theme: 'dark' }));
+    const home = $('[data-page]').first();
+    const heads = home.find('.hs-t').toArray().map(e => $(e).text().trim());
+    assert.ok(heads.includes('Why Choose Us'), 'site heading kept and tidied: ' + heads.join(' | '));
+    assert.ok(heads.includes('Our story'));
+    assert.ok(heads.length >= 5, 'at least 5 scraped or guaranteed sections: ' + heads.length);
+    assert.ok(home.find('.hs-card').length >= 3, 'cards rendered');
+    assert.ok(home.find('.hs-logos .lg').length >= 4, 'logo wall rendered');
+    assert.ok(home.find('.hs-q').length >= 1, 'testimonial rendered');
+    assert.ok(home.find('.hs-step').length >= 3, 'how it works steps rendered');
+    assert.ok(!heads.some(h => /what we manufacture/i.test(h)), 'catalogue-mirroring section not duplicated');
+    assert.ok(!heads.some(h => /get in touch|quick links/i.test(h)), 'cta and footer sections skipped');
+  });
+}
+
+test('the home page of a site that exposes little still has several sections', () => {
+  for (const t of TEMPLATES) {
+    const $ = visible(t.render({ ...minimal, certifications: ['ISO 9001', 'CE'], industries: ['Automotive', 'Medical', 'Telecom'] }, { theme: 'dark' }));
+    assert.ok($('[data-page]').first().find('section.hs').length >= 3, t.id + ' thin-site home sections');
+  }
 });

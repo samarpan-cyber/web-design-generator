@@ -1,5 +1,5 @@
 // Design 4, AURORA GLASS. Soft futurism. Bottom dock navigation, compositor-only gradient glow, pinned scroll story, glass cards.
-import { esc, buildModel, shell, themeVars, media, logoMark, themeBtn, quoteBtn, goLink, socialLinks, contactForm, factList } from './common.js';
+import { esc, sectionsHtml, buildModel, shell, themeVars, media, logoMark, themeBtn, quoteBtn, goLink, socialLinks, contactForm, factList } from './common.js';
 
 const PAGES = [['home', 'Home'], ['range', 'Range'], ['sectors', 'Sectors'], ['about', 'About'], ['contact', 'Contact']];
 const ICON = {
@@ -18,6 +18,7 @@ ${themeVars(m, {
 })}
 :root{--flag-bottom:92px}
 body{font-family:'Sora',system-ui,sans-serif;line-height:1.6;font-size:15px}
+:root{--hs-w:1180px;--hs-ff:'Sora',sans-serif;--hs-r:28px}.hs-card,.hs-step,.hs-q,.hs-list li{box-shadow:inset 0 1px 0 rgba(255,255,255,.1)}
 .wrap{width:min(1180px,100% - 40px);margin-inline:auto}
 .aurora{position:fixed;inset:0;z-index:-1;overflow:hidden;background:var(--bg);contain:strict}
 .aurora i{position:absolute;border-radius:50%;will-change:transform;opacity:.55}
@@ -90,6 +91,7 @@ export function renderAurora(profile, opts = {}) {
   const home = `<section class="hero"><div class="wrap hero-grid"><div><span class="badge glass blur" data-reveal><i></i>${esc(t.eyebrow)}</span><h1 data-reveal data-delay="70"><span>${esc(m.headline)}</span></h1><p class="lead" data-reveal data-delay="130">${esc(m.sub)}</p>
 <div class="cta" data-reveal data-delay="190"><a class="btn primary" href="#/range" data-go="range" data-magnetic>${esc(t.ctaA)}</a><button class="btn" data-quote-open data-magnetic>${esc(t.ctaB)}</button></div></div>
 <div class="stack" data-reveal="zoom" data-delay="120"><div class="c1 glass" data-tilt="6">${media(m.img.hero)}</div><div class="c2 glass blur"><small>${esc(m.certs[0] ? t.certsTitle : t.pill)}</small><b>${esc(m.certs[0] || m.sectors[0].name)}</b></div></div></div></section>
+${sectionsHtml(m)}
 <section class="story" style="--n:${story.length}"><div class="wrap story-in"><div class="stage glass" data-reveal="zoom">${story.map((p, i) => media(p, i === 0 ? 'on' : '')).join('')}</div>
 <div class="steps">${sh(t.featKicker, t.featTitle)}${story.map((p, i) => `<div class="stp glass ${i === 0 ? 'on' : ''}"><small>0${i + 1}</small><h3>${esc(p.name)}</h3>${p.desc2 ? `<p>${esc(p.desc2)}</p>` : ''}<button class="btn" data-quote="${esc(p.name)}"><span data-label>${esc(t.add)}</span></button></div>`).join('')}<div class="bar"><i></i></div></div></div></section>
 <section class="blk"><div class="wrap">${sh(t.statsKicker, t.statsTitle)}<div class="stats">${m.stats.map(s => `<div class="stat glass" data-reveal="zoom"><b data-count="${s.value}" data-suffix="${esc(s.suffix)}">0</b><span>${esc(s.label)}</span></div>`).join('')}</div></div></section>
@@ -97,8 +99,7 @@ export function renderAurora(profile, opts = {}) {
 
   const range = `<section class="blk" style="padding-top:120px"><div class="wrap">${sh(PAGES[1][1], t.prodTitle, t.prodSub)}<div class="tools"><label class="search glass blur"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" placeholder="${esc(t.search)}" aria-label="${esc(t.search)}"></label>${quoteBtn('Quote list')}</div><div class="grid">${P.map(pc).join('')}</div><p class="empty" data-empty hidden>${esc(t.empty)}</p></div></section>`;
 
-  const sectors = `<section class="blk" style="padding-top:120px"><div class="wrap">${sh(PAGES[2][1], t.solTitle, t.solSub)}<div class="sgrid">${m.sectors.map((s, i) => `<div class="sec glass" data-reveal data-delay="${(i % 3) * 70}"><div class="no">${String(i + 1).padStart(2, '0')}</div><h3>${esc(s.name)}</h3><p>${esc(s.line)}</p></div>`).join('')}</div></div></section>
-<section class="blk" style="padding-top:0"><div class="wrap">${sh(t.stepsTitle, t.stepsTitle)}<div class="tl">${t.steps.map(([a, b], i) => `<div class="glass" data-reveal data-delay="${i * 80}"><b>${i + 1}</b><h3>${esc(a)}</h3><p>${esc(b)}</p></div>`).join('')}</div></div></section>`;
+  const sectors = `<section class="blk" style="padding-top:120px"><div class="wrap">${sh(PAGES[2][1], t.solTitle, t.solSub)}<div class="sgrid">${m.sectors.map((s, i) => `<div class="sec glass" data-reveal data-delay="${(i % 3) * 70}"><div class="no">${String(i + 1).padStart(2, '0')}</div><h3>${esc(s.name)}</h3><p>${esc(s.line)}</p></div>`).join('')}</div></div></section>`;
 
   const facts = factList(m);
   const kv = `<div class="kv">${facts.map(([k, v, h]) => `<div class="glass"><b>${esc(k)}</b>${h ? `<a href="${esc(h)}" target="_blank" rel="noopener">${esc(v)}</a>` : `<span>${esc(v)}</span>`}</div>`).join('')}</div>`;

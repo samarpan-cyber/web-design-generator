@@ -29,7 +29,7 @@ async function run(label, viewport) {
   await page.click('[data-t=light]'); await page.click('[data-t=auto]');
   // present mode: open design 4, walk all 5 pages inside it
   await page.click('[data-open="3"]'); await page.waitForTimeout(1500);
-  ok(/\/view\/3$/.test(page.url()) && await page.locator('#viewer').isVisible(), `${label}: viewer opens with its own URL`);
+  ok(/\/compare\/view\/3$/.test(page.url()) && await page.locator('#viewer').isVisible(), `${label}: viewer opens with its own URL`);
   const fr = page.frameLocator('#vFrame'); const ids = await fr.locator('[data-page]').evaluateAll(els => els.map(e => e.dataset.page));
   ok(ids.length >= 5, `${label}: design has ${ids.length} pages`);
   for (const id of ids) { await fr.locator(`a[data-go="${id}"]`).first().evaluate(a => a.click()); await page.waitForTimeout(250); const on = await fr.locator('.page.on').getAttribute('data-page'); ok(on === id, `${label}: navigates to ${id}`); }
@@ -40,8 +40,26 @@ async function run(label, viewport) {
   ok(await page.locator('#viewer').isHidden() && await page.locator('#results').isVisible(), `${label}: browser Back returns to the results`);
   await page.click('[data-open="0"]'); await page.waitForTimeout(800); await page.click('#vClose'); await page.waitForTimeout(500);
   ok(await page.locator('#viewer').isHidden(), `${label}: Back to generator button closes viewer`);
-  await page.click('#pitchBtn'); await page.waitForTimeout(300);
-  ok(/copied/i.test(await page.locator('#toast').innerText()) && (await page.locator('#steps li.on').getAttribute('data-s')) === '4', `${label}: pitch note copied and step 4 active`);
+  // navigation between steps: Compare -> Website -> Compare, and with the browser Back button
+  ok(page.url().endsWith('#/electronics/compare') && (await page.locator('#steps li.on').getAttribute('data-s')) === '3', `${label}: Compare has its own URL`);
+  await page.click('#steps li[data-s="2"] button'); await page.waitForTimeout(300);
+  ok(await page.locator('#welcome').isVisible() && await page.locator('#results').isHidden() && page.url().endsWith('#/electronics'), `${label}: step 2 returns to the Website screen`);
+  ok(await page.locator('#resume').isVisible(), `${label}: results are kept, with a way back`);
+  await page.click('#resumeBtn'); await page.waitForTimeout(300);
+  ok(await page.locator('#results').isVisible() && await page.locator('#grid .card').count() === 5, `${label}: Back to the five designs works`);
+  await page.click('#newSite'); await page.waitForTimeout(300);
+  ok(await page.locator('#welcome').isVisible(), `${label}: New website button`);
+  await page.goBack(); await page.waitForTimeout(400);
+  ok(await page.locator('#results').isVisible(), `${label}: browser Back from Website returns to Compare`);
+  await page.click('#steps li[data-s="1"] button'); await page.waitForTimeout(300);
+  ok(await page.locator('#gate').isVisible(), `${label}: step 1 returns to the industry screen`);
+  await page.goBack(); await page.waitForTimeout(400);
+  ok(await page.locator('#results').isVisible(), `${label}: browser Back from industry screen returns to Compare`);
+  await page.click('#steps li[data-s="4"] button'); await page.waitForTimeout(300);
+  ok(await page.locator('#pitchDlg').isVisible() && (await page.inputValue('#pitchText')).includes('Hi '), `${label}: pitch panel opens with a note`);
+  await page.click('#pitchCopy'); await page.waitForTimeout(300);
+  ok(/copied/i.test(await page.locator('#toast').innerText()), `${label}: pitch note copied`);
+  await page.keyboard.press('Escape'); await page.waitForTimeout(200);
   if (viewport.width > 760) { await page.click('#changeInd'); await page.waitForTimeout(300); ok(await page.locator('#gate').isVisible(), `${label}: Change industry returns to gate`); }
   const ov = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth); ok(ov <= 2, `${label}: no horizontal overflow (${ov}px)`);
   await page.close();

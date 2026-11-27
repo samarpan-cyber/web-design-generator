@@ -1,5 +1,5 @@
 // Design 5, KINETIC. Editorial and loud. Full-screen menu, giant type, velocity marquee, scroll-lit statement, hover-preview index.
-import { esc, buildModel, shell, themeVars, media, logoMark, themeBtn, quoteBtn, goLink, socialLinks, contactForm, factList } from './common.js';
+import { esc, sectionsHtml, buildModel, shell, themeVars, media, logoMark, themeBtn, quoteBtn, goLink, socialLinks, contactForm, factList } from './common.js';
 
 const PAGES = [['home', 'Home'], ['index', 'Index'], ['sectors', 'Sectors'], ['about', 'About'], ['contact', 'Contact']];
 
@@ -9,6 +9,7 @@ ${themeVars(m, {
   dark: { bg: '#0c0c0c', bg2: '#151515', fg: '#f1efe8', muted: '#8f8d86', line: 'rgba(241,239,232,.2)', card: 'rgba(255,255,255,.05)' }
 })}
 body{font-family:'Bricolage Grotesque',system-ui,sans-serif;line-height:1.5;font-size:16px}
+:root{--hs-w:1360px;--hs-ff:'Bricolage Grotesque',sans-serif;--hs-fw:800;--hs-tt:uppercase;--hs-ls:-.045em;--hs-r:14px}.hs-t{font-size:clamp(34px,6.4vw,92px);line-height:.92}.hs-card,.hs-step,.hs-q,.hs-list li,.hs-logos .lg,.hs-media .plate{border:2px solid var(--fg)}.hs-card h3,.hs-step h3{text-transform:uppercase;letter-spacing:-.02em}.hs-k{letter-spacing:.14em}
 .ser{font-family:'Instrument Serif',Georgia,serif;font-style:italic;font-weight:400;letter-spacing:0}
 .big{font-weight:800;text-transform:uppercase;letter-spacing:-.045em;line-height:.88}
 .wrap{width:min(1360px,100% - 40px);margin-inline:auto}
@@ -83,6 +84,7 @@ export function renderKinetic(profile, opts = {}) {
 <div class="hero-row"><p class="ser">${esc(m.headline)}</p><div class="meta"><span>${esc(t.eyebrow)}</span>${m.address ? `<span>${esc(m.address.slice(0, 54))}</span>` : ''}</div><div class="cta"><a class="btn" href="#/index" data-go="index">${esc(t.ctaA)}</a><a class="btn ghost" href="#/contact" data-go="contact">${esc(t.ctaB)}</a></div></div></div></div>
 <div style="overflow:hidden"><div class="mq amb" aria-hidden="true"><div class="mq-t"><span>${mq.map(esc).join('</span><span>')}</span><span>${mq.map(esc).join('</span><span>')}</span><span>${mq.map(esc).join('</span><span>')}</span></div></div></div>
 <section class="blk"><div class="wrap"><div class="kick">${esc(t.aboutTitle)}</div><p class="stmt">${esc(m.sub)}</p></div></section>
+${sectionsHtml(m)}
 <section class="blk" style="padding-top:0"><div class="wrap"><div class="kick">${esc(t.featKicker)}</div><div class="feat">${P.slice(0, 3).map((p, i) => `<div class="fi" data-reveal><span class="n">0${i + 1}</span><div><h3>${esc(p.name)}</h3>${p.desc2 ? `<p>${esc(p.desc2)}</p>` : ''}<button class="btn" data-quote="${esc(p.name)}"><span data-label>${esc(t.add)}</span></button></div>${media(p)}</div>`).join('')}</div><div style="margin-top:26px">${goLink('index', t.featLink + ' →', 'btn ghost')}</div></div></section>
 <section class="blk" style="padding-top:0"><div class="wrap"><div class="kick">${esc(t.statsKicker)}</div><div class="stats">${m.stats.map(s => `<div class="stat" data-reveal><b class="big" data-count="${s.value}" data-suffix="${esc(s.suffix)}">0</b><span>${esc(s.label)}</span></div>`).join('')}</div></div></section>`;
 
@@ -92,8 +94,7 @@ export function renderKinetic(profile, opts = {}) {
 <div class="peek"><div class="plate art"><img alt="" src="${esc(m.img.hero.art)}"></div></div>`;
 
   const sectors = `<div class="wrap"><div class="phead"><div class="kick">${esc(PAGES[2][1])}</div><h1 class="big">${esc(t.solTitle)}</h1><p>${esc(t.solSub)}</p></div>
-<div class="secs">${m.sectors.map((s, i) => `<div class="sec" data-reveal><span class="n">${String(i + 1).padStart(2, '0')}</span><h3>${esc(s.name)}</h3><p>${esc(s.line)}</p></div>`).join('')}</div>
-<div class="kick" style="margin:clamp(50px,7vw,100px) 0 20px">${esc(t.stepsTitle)}</div><div class="how">${t.steps.map(([a, b], i) => `<div data-reveal data-delay="${i * 80}"><b class="big">${i + 1}</b><h3>${esc(a)}</h3><p>${esc(b)}</p></div>`).join('')}</div><div style="height:clamp(50px,8vw,110px)"></div></div>`;
+<div class="secs">${m.sectors.map((s, i) => `<div class="sec" data-reveal><span class="n">${String(i + 1).padStart(2, '0')}</span><h3>${esc(s.name)}</h3><p>${esc(s.line)}</p></div>`).join('')}</div><div style="height:clamp(50px,8vw,110px)"></div></div>`;
 
   const about = `<div class="wrap"><div class="phead"><div class="kick">${esc(PAGES[3][1])}</div><h1 class="big">${esc(t.aboutTitle)}</h1><p>${esc(t.aboutSub)}</p></div>
 <div class="cols" style="padding-bottom:clamp(50px,8vw,110px)"><div data-reveal="left">${media(m.img.about)}</div><div data-reveal="right">${m.aboutLine ? `<p class="lede">${esc(m.aboutLine)}</p>` : ''}<div class="kick" style="margin-top:8px">${esc(t.factsTitle)}</div>${kv}${m.certs.length ? `<div class="kick" style="margin-top:30px">${esc(t.certsTitle)}</div><div class="tags" style="margin-top:0">${m.certs.map(c => `<span>${esc(c)}</span>`).join('')}</div>` : ''}</div></div></div>`;

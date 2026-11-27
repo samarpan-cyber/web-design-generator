@@ -1,5 +1,5 @@
 // Design 3, BLUEPRINT. Engineering-drawing look. Left sheet index, table catalogue, RFQ form, crosshair cursor.
-import { esc, buildModel, shell, themeVars, media, logoMark, themeBtn, menuBtn, quoteBtn, goLink, mobileLinks, socialLinks, contactForm, factList } from './common.js';
+import { esc, sectionsHtml, buildModel, shell, themeVars, media, logoMark, themeBtn, menuBtn, quoteBtn, goLink, mobileLinks, socialLinks, contactForm, factList } from './common.js';
 
 const PAGES = [['home', 'Index'], ['catalogue', 'Catalogue'], ['apps', 'Applications'], ['company', 'Company'], ['rfq', 'RFQ']];
 
@@ -23,6 +23,7 @@ header[data-header]{position:fixed;left:0;top:0;bottom:0;width:232px;z-index:80;
 .qbtn,.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:12px 18px;min-height:46px;border:1px solid var(--fg);background:transparent;font:500 12px 'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;text-decoration:none;transition:transform .2s,box-shadow .2s;color:var(--fg)}
 .btn.primary,.qbtn{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}.btn:hover,.qbtn:hover{transform:translate3d(-3px,-3px,0);box-shadow:4px 4px 0 var(--brand)}.btn.added{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
 main{margin-left:232px}.wrap{width:min(1080px,100% - 56px);margin-inline:auto}
+:root{--hs-w:100%;--hs-ff:'Barlow Condensed',sans-serif;--hs-fw:600;--hs-tt:uppercase;--hs-ls:.01em;--hs-r:0px}.hs{padding:clamp(36px,5vw,64px) 0;border-bottom:1px solid var(--fg)}.hs-k{font-family:'IBM Plex Mono',monospace;font-weight:500}.hs-t{font-size:clamp(34px,5vw,64px);line-height:.95}.hs-card,.hs-step,.hs-q,.hs-list li,.hs-logos .lg{border-color:var(--fg)}.hs-step b{border-radius:0}.hs-bul li::before,.hs-list li::before{border-radius:0}
 .sheet{padding:clamp(40px,6vw,80px) 0;border-bottom:1px solid var(--fg)}
 .tb{font-size:11px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;display:flex;gap:18px;flex-wrap:wrap;margin-bottom:20px}.tb b{color:var(--brand);font-weight:500}
 h1{font-size:clamp(46px,7vw,104px);line-height:.9;margin:0 0 22px}h1 span{color:var(--brand)}
@@ -80,6 +81,7 @@ ${[0, 1, 2, 3, 4, 5].map(i => `<path class="dr" pathLength="1" d="M${212 + i * 2
 <h1 class="d" data-reveal data-delay="70">${esc(m.headline)}</h1><p class="lead" data-reveal data-delay="130">${esc(m.sub)}</p>
 <div class="cta" data-reveal data-delay="190"><a class="btn primary" href="#/catalogue" data-go="catalogue" data-magnetic>${esc(t.ctaA)}</a><button class="btn" data-quote-open data-magnetic>${esc(t.ctaB)}</button></div></div>
 <div class="frame" data-reveal="zoom"><i></i>${schematic}<div class="tblk"><div>Subject</div><div>${esc(m.name)}</div><div>Drawn by</div><div>${esc(m.agency || 'Design team')}</div><div>Scale</div><div>1 : 1</div></div></div></div>
+${sectionsHtml(m)}
 <div class="sheet">${dim('FIG. 01 / ' + t.statsKicker)}<div class="stats">${m.stats.map(s => `<div class="stat" data-reveal><b data-count="${s.value}" data-suffix="${esc(s.suffix)}">0</b><span>${esc(s.label)}</span></div>`).join('')}</div></div>
 <div class="sheet">${dim('FIG. 02 / ' + t.featTitle)}<div class="figs">${P.slice(0, 3).map((p, i) => `<article class="fig" data-reveal data-delay="${i * 80}"><div class="cap"><span>Item <b>0${i + 1}</b></span><span>${code(i)}</span></div>${media(p)}<h3 class="d">${esc(p.name)}</h3>${p.desc2 ? `<p>${esc(p.desc2)}</p>` : ''}<button class="btn" data-quote="${esc(p.name)}"><span data-label>${esc(t.add)}</span></button></article>`).join('')}</div><div style="margin-top:22px">${goLink('catalogue', t.featLink + ' →', 'btn')}</div></div>
 <div class="sheet" style="border:0;text-align:center"><h2 class="d" data-reveal style="max-width:16ch;margin:0 auto 12px">${esc(t.bandTitle)}</h2><p class="lead" style="margin:0 auto 24px">${esc(t.bandSub)}</p><button class="btn primary" data-quote-open data-magnetic>${esc(t.bandCta)}</button></div></div>`;
@@ -88,8 +90,7 @@ ${[0, 1, 2, 3, 4, 5].map(i => `<path class="dr" pathLength="1" d="M${212 + i * 2
 <div class="tools"><label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" placeholder="${esc(t.search)}" aria-label="${esc(t.search)}"></label>${quoteBtn('RFQ list')}</div>
 <div class="table"><div class="th"><span>No.</span><span>View</span><span>Item</span><span>Note</span><span></span></div>${P.map((p, i) => `<div class="tr" data-prod="${esc(p.name)}" data-reveal><span class="no">${String(i + 1).padStart(2, '0')}</span>${media(p)}<h3 class="d">${esc(p.name)}</h3><p>${esc(p.desc || code(i))}</p><div class="act"><button class="btn" data-quote="${esc(p.name)}"><span data-label>${esc(t.add)}</span></button>${p.url ? `<a class="btn" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(t.details)}</a>` : ''}</div></div>`).join('')}</div><p class="empty" data-empty hidden>${esc(t.empty)}</p></div></div>`;
 
-  const apps = `<div class="wrap"><div class="sheet"><div class="tb"><span>${esc(PAGES[2][1])}</span></div><h1 class="d" style="font-size:clamp(44px,6vw,88px)">${esc(t.solTitle)}</h1><p class="lead">${esc(t.solSub)}</p><div class="apps">${m.sectors.map((s, i) => `<div class="app" data-reveal data-delay="${i * 40}"><span class="n">${String(i + 1).padStart(2, '0')}</span><h3 class="d">${esc(s.name)}</h3><p>${esc(s.line)}</p></div>`).join('')}</div></div>
-<div class="sheet" style="border:0">${dim(t.stepsTitle)}<div class="flow">${t.steps.map(([a, b], i) => `<div data-reveal data-delay="${i * 80}"><b>${esc(a)}</b><h3 class="d">${esc(b)}</h3></div>`).join('')}</div></div></div>`;
+  const apps = `<div class="wrap"><div class="sheet"><div class="tb"><span>${esc(PAGES[2][1])}</span></div><h1 class="d" style="font-size:clamp(44px,6vw,88px)">${esc(t.solTitle)}</h1><p class="lead">${esc(t.solSub)}</p><div class="apps">${m.sectors.map((s, i) => `<div class="app" data-reveal data-delay="${i * 40}"><span class="n">${String(i + 1).padStart(2, '0')}</span><h3 class="d">${esc(s.name)}</h3><p>${esc(s.line)}</p></div>`).join('')}</div></div></div>`;
 
   const kv = rows => `<div class="kv">${rows.map(([k, v, h]) => `<div><span>${esc(k)}</span>${h ? `<a href="${esc(h)}" target="_blank" rel="noopener">${esc(v)}</a>` : `<b style="font-weight:400">${esc(v)}</b>`}</div>`).join('')}</div>`;
   const facts = factList(m);
