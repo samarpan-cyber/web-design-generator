@@ -81,3 +81,5 @@ body.is-login .steps{visibility:hidden}
 .by-act{display:flex;gap:8px;flex-wrap:wrap}.by-act a{padding:8px 12px;border:1px solid currentColor;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px}.by-act a.wa{background:#16a34a;border-color:#16a34a;color:#fff}
 
 .ghost-sel{padding:8px 10px;border-radius:10px;border:1px solid var(--line,#2a3446);background:transparent;color:inherit;font:inherit;font-size:13px;max-width:190px}.ghost-sel option{color:#111}
+
+.by-state{margin-top:22px;display:grid;gap:12px;justify-items:center}.by-state .who b{display:block;font-size:18px}.by-state .who span{opacity:.7;font-size:13px}.by-state .by-act{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}.by-state .by-act a{padding:8px 14px;border:1px solid var(--line,#334155);border-radius:8px;text-decoration:none;color:inherit;font-weight:600;font-size:14px}.by-state .by-act a.wa{background:#16a34a;border-color:#16a34a;color:#fff}.by-state .note{opacity:.6;font-size:12px}

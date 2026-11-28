@@ -5,15 +5,15 @@ import { stockPhotos } from '../public/engine/stock.js';
 import { extractIndustrial, statFromCard } from '../lib/industrial.js';
 
 const IND = LIBRARY.filter(t => t.id.startsWith('ind-'));
-const CLIN2 = LIBRARY.filter(t => /^clinic-(kids|luxe|compass|mono|calm|glass|wphealth)$/.test(t.id));
+const CLIN2 = LIBRARY.filter(t => /^clinic-(kids|luxe|compass|mono|calm|glass|wphealth|allcare|tarneit|portrait|roundcare)$/.test(t.id));
 const base = ind => ({ name: 'Greenloop Polymers', host: 'greenloop.test', url: 'https://greenloop.test', industry: ind, colors: {}, contacts: { emails: ['sales@greenloop.test'], phones: ['+91 98765 43210'], address: 'Plot 12, GIDC, Vapi' }, products: [], images: [], stats: [], social: {}, nav: [], categories: [], industries: [], certifications: [], headings: [], description: 'Plastic recycling for packaging makers.', sections: [] });
 const withProducts = ind => ({ ...base(ind), products: [{ name: 'HDPE Regrind', description: 'Washed and dried regrind for moulding.' }, { name: 'PP Granules', description: '' }, { name: 'Shredder Feeder Extruder', description: 'A line for bulky scrap.' }, { name: 'Washing Line', description: '' }], certifications: ['ISO 9001'], industrial: { stats: [{ value: 25, suffix: '+', label: 'Years in business' }, { value: 400, suffix: '', label: 'Tonnes a month' }], applications: [{ name: 'Packaging', text: '', image: '' }, { name: 'Pipes', text: '', image: '' }, { name: 'Automotive', text: '', image: '' }], capabilities: [], standards: [], steps: [], materials: ['HDPE', 'PP'], packaging: '', capacity: '', productGroups: [] } });
 const text = html => { const $ = cheerio.load(html); $('style,script').remove(); return $; };
 const designer = { company: 'Digifyo', name: 'Chirag Thakker', phone: '+91 90000 00000' };
 
-test('eleven industrial designs (eight creative, three WordPress style) and seven more clinic designs', () => {
-  assert.equal(IND.length, 11); assert.equal(IND.filter(t => t.family === 'classic').length, 3); assert.equal(new Set(IND.map(t => t.id)).size, 11);
-  assert.equal(CLIN2.length, 7); assert.equal(CLIN2.filter(t => t.family === 'classic').length, 1);
+test('fifteen industrial designs (eleven creative, four WordPress style) and eleven more clinic designs', () => {
+  assert.equal(IND.length, 15); assert.equal(IND.filter(t => t.family === 'classic').length, 4); assert.equal(new Set(IND.map(t => t.id)).size, 15);
+  assert.equal(CLIN2.length, 11); assert.equal(CLIN2.filter(t => t.family === 'classic').length, 3);
 });
 
 for (const t of IND) {

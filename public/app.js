@@ -305,16 +305,25 @@ function openIntake(prefill = {}) {
 }
 $('#intakeBtn').onclick = () => openIntake();
 $('#startDetails').onclick = () => openIntake({ name: '', url: '' });
+/* photos are shrunk in the browser (max 1400 px, JPEG) so a design stays light and the request small */
+async function shrinkImage(file) {
+  try {
+    const bmp = await createImageBitmap(file); const k = Math.min(1, 1400 / Math.max(bmp.width, bmp.height)); const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height); const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.78));
+    return readFile(new File([blob], file.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' }));
+  } catch { return readFile(file); }
+}
 $('#intakeForm').addEventListener('submit', async e => {
   if (e.submitter && e.submitter.value !== 'ok') return;
   e.preventDefault(); const f = e.target, err = $('#intakeErr'); err.textContent = ''; const go = $('#intakeGo'); go.disabled = true; go.textContent = 'Reading...';
   try {
     const list = [...f.files.files]; if (list.some(x => x.size > 4e6)) throw new Error('Each file must be under 4 MB.');
-    const files = await Promise.all(list.map(readFile));
-    const res = await api('/api/intake', { name: f.name.value, url: f.url.value, gmb: f.gmb.value, gmbUrl: f.gmbUrl.value, linkedin: f.linkedin.value, notes: f.notes.value, industry: f.industry.value, files });
+    const files = await Promise.all(list.map(x => (/^image\//.test(x.type) ? shrinkImage(x) : readFile(x))));
+    const lines = t => String(t || '').split(/\n+/).map(x => x.trim()).filter(Boolean);
+    const res = await api('/api/intake', { name: f.name.value, url: f.url.value, gmb: f.gmb.value, gmbUrl: f.gmbUrl.value, linkedin: f.linkedin.value, notes: f.notes.value, industry: f.industry.value, sources: lines(f.sources.value), photos: lines(f.photos.value), files });
     if (res.status === 401) { $('#intakeDlg').close(); expired(); return; }
     if (!res.ok) throw new Error(res.error || 'Could not read that');
-    $('#intakeDlg').close(); showResults(res.profile); if (res.profile.industry) { const to = INDUSTRIES.find(i => i.id === res.profile.industry && i.ready); if (to) { state.industry = to; $('#indName').textContent = to.name; } } say(`Built from your files: ${(res.notes || []).map(esc).join(', ') || 'details added'}.${res.visionError ? ' ' + esc(res.visionError) : ''}`);
+    $('#intakeDlg').close(); showResults(res.profile); if (res.profile.industry) { const to = INDUSTRIES.find(i => i.id === res.profile.industry && i.ready); if (to) { state.industry = to; $('#indName').textContent = to.name; } } say(`Built from your files: ${(res.notes || []).map(esc).join(', ') || 'details added'}.${res.visionError ? ' ' + esc(res.visionError) : ''}${(res.failed || []).map(x => '<br>Could not read ' + esc(x.url) + ': ' + esc(x.reason)).join('')}`);
   } catch (x) { err.textContent = x.message; } finally { go.disabled = false; go.textContent = 'Build designs'; }
 });
 

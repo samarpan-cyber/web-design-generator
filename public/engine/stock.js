@@ -29,4 +29,4 @@ export function stockPhotos(industry, seed = '', base = '/stock/', segment = '')
   return entries.map(e => ({ src: `${b}${e}-l.jpg`, small: `${b}${e}-s.jpg`, isStock: true }));
 }
 /** Is a scraped image big enough to be shown full width? Unknown size is trusted, known small sizes are not. */
-export const goodPhoto = i => !!i && !!i.src && !(i.w && i.w < 640) && !/logo|icon|avatar|favicon|badge|flag|sprite/i.test(i.src + ' ' + (i.alt || ''));
+export const goodPhoto = i => !!i && !!i.src && (i.own || /^data:image\//i.test(i.src) || (!(i.w && i.w < 640) && !/logo|icon|avatar|favicon|badge|flag|sprite/i.test(i.src + ' ' + (i.alt || ''))));

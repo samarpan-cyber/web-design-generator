@@ -39,6 +39,10 @@ const CLINIC2_SEG = {
   'clinic-mono': { solo: 3, implants: 2, ortho: 2, cosmetic: 1.5, clinic: 1, general: 1, hospital: 0.5, wellness: 1, kids: 0.3 },
   'clinic-calm': { wellness: 4, cosmetic: 2, solo: 1.5, general: 1.2, clinic: 1, kids: 1, ortho: 0.5, implants: 0.4, hospital: 0.3 },
   'clinic-glass': { implants: 3.5, ortho: 3, hospital: 1.5, cosmetic: 1.5, clinic: 1.2, general: 1, solo: 1, kids: 0.3, wellness: 0.3 },
+  'clinic-allcare': { general: 3, clinic: 3, kids: 2.5, cosmetic: 1.5, ortho: 2, implants: 1.5, solo: 1.5, hospital: 0.8, wellness: 0.6 },
+  'clinic-tarneit': { cosmetic: 3, implants: 2.5, ortho: 2.5, general: 2, kids: 1.5, clinic: 1.5, solo: 1, wellness: 0.8, hospital: 0.4 },
+  'clinic-portrait': { solo: 4, clinic: 1.5, implants: 1.5, ortho: 1.5, cosmetic: 1.2, general: 1, wellness: 1.2, kids: 0.5, hospital: 0.6 },
+  'clinic-roundcare': { hospital: 4, clinic: 2.5, general: 1.5, kids: 1.5, wellness: 1, ortho: 0.8, implants: 0.6, cosmetic: 0.4, solo: 0.6 },
   'clinic-wphealth': { clinic: 2.5, general: 2.5, hospital: 1.5, solo: 1.2, kids: 1.2, ortho: 1.2, implants: 1, cosmetic: 1, wellness: 1 }
 };
 const clinic2 = CLINIC2_VARIANTS.map((v, i) => ({ id: v.id, segments: CLINIC2_SEG[v.id], industries: H, family: v.family, defaultTheme: v.theme, lightOnly: true, name: v.name, tagline: v.tagline, best: v.best, render: (p, o) => renderClinic2(i, p, { photoSeed: v.id, ...o }) }));
@@ -49,6 +53,8 @@ const industrial = INDUSTRIAL_VARIANTS.map((v, i) => ({ id: v.id, industries: v.
 
 /** Every design the generator knows. Add a template here and it joins the pool for its industries. */
 export const LIBRARY = [...modern, ...classic, ...clinic, ...clinic2, ...estate, ...industrial];
+// frosted glass looks read as machine made, so these stay available but are rarely suggested
+const GLASSY = ['aurora', 'ind-brandlab', 'clinic-glass'];
 export const getTemplate = id => LIBRARY.find(t => t.id === id);
 export { INDUSTRIES, detectIndustry, industryName, SEGMENTS, ROLES };
 
@@ -71,7 +77,7 @@ export function pickSet(profile = {}, round = 0, { modern: nm = 3, classic: nc =
   const seg = segment || info.segment || ''; const rol = role || info.role || '';
   const r = rng(hash((profile.host || profile.name || 'site') + ':' + ind + ':' + round));
   const ok = t => t.industries.includes(ind) && (!allow || allow.includes(t.id));
-  const wt = t => ((t.segments && seg && t.segments[seg] !== undefined) ? t.segments[seg] : 1) * ((t.roles && rol && t.roles[rol] !== undefined) ? t.roles[rol] : 1);
+  const wt = t => (GLASSY.includes(t.id) ? 0.15 : 1) * ((t.segments && seg && t.segments[seg] !== undefined) ? t.segments[seg] : 1) * ((t.roles && rol && t.roles[rol] !== undefined) ? t.roles[rol] : 1);
   const pool = fam => LIBRARY.filter(t => t.family === fam && ok(t));
   const mp = pool('modern'), cp = pool('classic');
   const m = weighted(mp, mp.map(wt), nm, r), c = weighted(cp, cp.map(wt), nc, r);

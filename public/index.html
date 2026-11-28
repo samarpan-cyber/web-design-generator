@@ -103,11 +103,13 @@
   <div class="dlg-actions"><button value="cancel" class="ghost">Cancel</button><button value="ok" class="primary">Apply</button></div>
 </form></dialog>
 <dialog id="intakeDlg"><form method="dialog" class="edit" id="intakeForm">
-  <h3>Add information</h3><p class="hint">For sites that cannot be read. Upload an Excel or CSV product list, a sitemap.xml, a Google Business export, or a screenshot of the site. Everything is combined with what was already found.</p>
+  <h3>Add information</h3><p class="hint">For sites that cannot be read or have little to read. Add the client's old or current website, a directory listing (Practo, Justdial, IndiaMART, TradeIndia and similar), photos, an Excel or CSV product list, a sitemap.xml, a Google Business export, a saved page (.html) or a screenshot. Everything is combined with what was already found.</p>
   <label>Company name<input name="name"></label>
   <div class="two"><label>Website address (optional)<input name="url" placeholder="company.com"></label><label>Industry<select name="industry"><option value="">Detect it for me</option><option value="electronics">Electronics</option><option value="recycling">Plastic recycling</option><option value="chemicals">Chemicals</option><option value="dentists">Dentists</option><option value="doctors">Doctors</option><option value="realestate">Real estate</option></select></label></div>
   <div class="two"><label>LinkedIn profile or company link (optional)<input name="linkedin" placeholder="linkedin.com/in/..."></label><label>Google Maps / Business link (optional)<input name="gmbUrl" placeholder="google.com/maps/place/..."></label></div>
-  <label>Files<input name="files" type="file" multiple accept=".xlsx,.csv,.tsv,.txt,.xml,.json,.png,.jpg,.jpeg,.webp"></label>
+  <label>Take content from these links too (one per line)<textarea name="sources" rows="3" placeholder="https://their-old-site.com&#10;https://www.practo.com/pune/clinic/...&#10;https://www.indiamart.com/company/"></textarea></label>
+  <label>Photo links (one per line, shown first)<textarea name="photos" rows="2" placeholder="https://.../photo1.jpg"></textarea></label>
+  <label>Files (photos, sheets, saved pages)<input name="files" type="file" multiple accept=".xlsx,.csv,.tsv,.txt,.xml,.json,.html,.htm,.png,.jpg,.jpeg,.webp"></label>
   <label>Google Business details (paste)<textarea name="gmb" rows="3" placeholder="Name: ...&#10;Category: Dentist&#10;Phone: ...&#10;Address: ...&#10;Rating: 4.8 (312 reviews)"></textarea></label>
   <label>Notes (anything else you know, like a LinkedIn headline)<textarea name="notes" rows="2" placeholder="Orthodontist, 15 years, Pune"></textarea></label>
   <p id="intakeErr" class="login-msg" role="alert"></p>

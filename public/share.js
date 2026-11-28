@@ -9,13 +9,17 @@ const post = (frame, msg) => { try { frame.contentWindow.postMessage(msg, '*'); 
 const token = (location.pathname.match(/^\/s\/([\w.-]+)/) || [])[1] || new URLSearchParams(location.search).get('t') || '';
 const state = { profile: null, agency: '', exp: 0, viewer: 0, pushed: false };
 
-function stateScreen(title, text) { $('#shMain').hidden = true; $('#viewer').hidden = true; $('#shState').hidden = false; $('#shStateTitle').textContent = title; $('#shStateText').textContent = text; }
+function stateScreen(title, text, d) {
+  $('#shMain').hidden = true; $('#viewer').hidden = true; $('#shState').hidden = false; $('#shStateTitle').textContent = title; $('#shStateText').textContent = text;
+  const box = $('#shStateWho'); if (!box) return; box.innerHTML = '';
+  if (d) { const wa = String(d.whatsapp || d.phone || '').replace(/\D/g, ''); box.innerHTML = `<div class="who"><b>${esc(d.name || d.company)}</b><span>${d.role ? esc(d.role) + ', ' : ''}${esc(d.company)}</span></div><div class="by-act">${d.phone ? `<a href="tel:${esc(d.phone.replace(/[^+\d]/g, ''))}">Call ${esc(d.phone)}</a>` : ''}${wa ? `<a class="wa" href="https://wa.me/${wa}" target="_blank" rel="noopener">WhatsApp</a>` : ''}${d.email ? `<a href="mailto:${esc(d.email)}">${esc(d.email)}</a>` : ''}${d.linkedin ? `<a href="${esc(d.linkedin)}" target="_blank" rel="noopener">LinkedIn</a>` : ''}${d.site ? `<a href="${esc(d.site)}" target="_blank" rel="noopener">${esc(d.site.replace(/^https?:\/\//, ''))}</a>` : ''}</div><small class="note">Note: every design link we share expires in 48 hours, for data safety.</small>`; }
+}
 
 async function load() {
   if (!token) return stateScreen('This link is not valid', 'Check that the whole link was copied, or ask for a new one.');
   let r, j = {};
   try { r = await fetch('/api/share?t=' + encodeURIComponent(token)); j = await r.json().catch(() => ({})); } catch { return stateScreen('Could not load the preview', 'Check your connection and reload the page.'); }
-  if (r.status === 410) return stateScreen('This link has expired', 'Private links stay open for 48 hours. Ask the person who sent it for a fresh one.');
+  if (r.status === 410) return stateScreen('This link has expired. Please contact Digifyo for the design.', 'Each link we share stays open for 48 hours, to keep your business details safe. Reach out and we will send a fresh one.', j.designer);
   if (r.status === 503) return stateScreen('Previews are not available right now', 'Please try again a little later.');
   if (!r.ok || !j.ok) return stateScreen('This link is not valid', 'Check that the whole link was copied, or ask for a new one.');
   state.profile = j.profile; state.agency = j.agency || ''; state.exp = j.exp; state.designer = j.designer || null;
@@ -30,7 +34,7 @@ async function load() {
   render(); route();
 }
 
-const htmlFor = (t, o = {}) => t.render(state.profile, { agency: state.agency, designer: state.designer, assetBase: location.origin + '/stock/', ...o });
+const htmlFor = (t, o = {}) => t.render(state.profile, { agency: state.agency, designer: state.designer, assetBase: location.origin + '/stock/', embed: matchMedia('(max-width:700px)').matches, ...o });
 
 function renderBy(d) {
   const box = $('#shBy'); if (!box || !d) return; const wa = String(d.whatsapp || d.phone || '').replace(/\D/g, '');

@@ -1,4 +1,4 @@
-# Design Generator V8
+# Design Generator V9
 
 Log in, pick an industry, paste a company website, and get **five distinct, mobile-ready, five-page redesign concepts** built from that company's real content. Share them with the client through a private link that stops working after 48 hours.
 
@@ -6,7 +6,13 @@ Log in, pick an industry, paste a company website, and get **five distinct, mobi
 login → industry → website or lead → /api/analyze reads the live site → profile → 5 designs → share link
 ```
 
-## What V8 adds
+## What V9 adds
+
+- **Designs modelled on sites you like.** Fourteen new designs, none of them glassy: electronics and industrial (Factory Floor, Brand Store, Showroom Elementor, Label Hero), real estate (Night Skyline, Masterpiece, Project Ledger, Curtain), dentists and doctors (Appointment First, Elementor Dental, Doctor Portrait, Round Care). Frosted glass designs are still there but rarely suggested.
+- **Content from anywhere.** Add the client's old or current website, a directory or marketplace listing (Practo, Justdial, IndiaMART, TradeIndia, Sulekha and similar), a saved page (.html) or pasted page source, and photo links or photo files (shrunk in the browser). Structured data on those pages (name, phone, address, rating, hours, reviews, doctors, products, photos) fills only what is missing. The industry follows the best source. Sites that block automated readers are reported, with the save-as-HTML fallback.
+- **Expired links** say "This link has expired. Please contact Digifyo for the design", show Chirag's call, WhatsApp, email, LinkedIn and website, and note that every link expires in 48 hours for data safety. In the phone viewer the footer is gone so the design gets the whole screen.
+
+## What V8 added
 
 - **Plastic recycling and Chemicals** join the home page as new industries, detected from the website, Google Business text, notes and sheets. Plastic recycling kinds: machinery maker, recycler or regranulator, collector or trader. Chemicals kinds: industrial and specialty, metal and surface treatment, water treatment, distributor. The extractor (`lib/industrial.js`) reads stat cards as counters, "industries served" and "materials" cards, quality and standards cards and process steps from the page. Tested on two real sites (see `docs/RESEARCH-INDUSTRIAL-CLINICS.md`).
 - **Eleven industrial designs** for electronics, plastic recycling and chemicals: Forge, Lab Notes, Closed Loop, Pellet Pop, Flow, Catalogue Pro, Plant Tour and Brand Lab (creative, each with its own fonts, hero and signature effect) plus Corporate WordPress, Catalogue WordPress and Elementor Style (plain). RFQ basket on every one.

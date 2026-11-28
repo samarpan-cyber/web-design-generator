@@ -11,8 +11,8 @@ const withProjects = seg => ({ ...base, industryInfo: { segment: seg, role: 'dev
 const bare = seg => ({ ...base, industryInfo: { segment: seg, role: 'agency' }, estate: { projects: [], rera: [], locations: [], configs: [], amenities: [] } });
 const text = html => { const $ = cheerio.load(html); $('style,script').remove(); return $; };
 
-test('eight real estate designs: six creative and two plain WordPress style', () => {
-  assert.equal(ESTATE.length, 8); assert.equal(ESTATE.filter(t => t.family === 'classic').length, 2); assert.equal(new Set(ESTATE.map(t => t.id)).size, 8);
+test('twelve real estate designs: ten creative and two plain WordPress style', () => {
+  assert.equal(ESTATE.length, 12); assert.equal(ESTATE.filter(t => t.family === 'classic').length, 2); assert.equal(new Set(ESTATE.map(t => t.id)).size, 12);
 });
 for (const t of ESTATE) {
   test(`${t.id}: five pages, no dashes, no repeated lines, no undefined, for every segment with and without projects`, () => {
